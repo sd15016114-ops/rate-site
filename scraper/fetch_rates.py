@@ -101,7 +101,7 @@ def make_soup(html):
         return BeautifulSoup(html, "html.parser")
 
 
-HEADING_NOISE = ("資料時間", "單位", "年息", "年利率", "下載", "列印")
+HEADING_NOISE = ("資料", "生效", "查詢時間", "單位", "年息", "年利率", "下載", "列印")
 HAS_CJK = re.compile(r"[\u4e00-\u9fff]")
 
 
@@ -124,6 +124,7 @@ def heading_category(h):
     if is_large(h) or any(w in h for w in ("優利", "可轉讓", "存單", "郵政", "專案", "外幣", "放款",
                                              "分期", "零存", "存本", "試算")):
         return None
+    h = h.replace("性", "")                    # 「定期性存款利率」視同「定期存款利率」
     if "定期儲蓄" in h or "定儲" in h:
         return "savings"
     if "定期存款" in h or "定存" in h:
@@ -177,15 +178,28 @@ def extract_rows(html):
 
 
 def debug_rows(html, rows):
-    """抓取失敗時，把可能相關的內容印到紀錄裡，方便判斷頁面長什麼樣子。"""
-    print("      共讀到 %d 列，表格標題：%s" % (
-        len(rows), "、".join(r[1] for r in rows if r[0] == "§" and len(r) > 1 and r[1])[:200]))
-    keys = ("活期", "活儲", "定期", "定存", "儲蓄", "固定", "機動")
-    hits = [r for r in rows if any(k in c for c in r for k in keys)]
-    for r in (hits or rows)[:28]:
-        print("      | " + " | ".join(c[:24] for c in r[:7]))
-    if len(hits) < 5:               # 沒有可用的表格：印出頁面上相關的文字，看版面長什麼樣子
-        soup = make_soup(html)
+    """抓取失敗時，把頁面的結構印到紀錄裡：每一區（表格或清單）的標題和前幾列。"""
+    blocks, cur = [], None
+    for r in rows:
+        if r[0] == "§":
+            cur = {"title": r[1] if len(r) > 1 else "", "rows": []}
+            blocks.append(cur)
+        elif cur is not None:
+            cur["rows"].append(r)
+    rated = [b for b in blocks if any(RATE.match(c) for r in b["rows"] for c in r)]
+    print("      共 %d 區，其中 %d 區含有利率數字" % (len(blocks), len(rated)))
+    for b in rated[:16]:
+        print("      【%s】共 %d 列" % (b["title"][:40] or "（沒有標題）", len(b["rows"])))
+        for r in b["rows"][:5]:
+            print("        | " + " | ".join(c[:22] for c in r[:6]))
+    soup = make_soup(html)
+    # 活儲那一列的原始內容：數字沒出現時，可以看出它是怎麼被填進去的
+    for el in soup.find_all(["tr", "li"]):
+        t = norm(el.get_text())
+        if (t.startswith("活期儲蓄") or t.startswith("新臺幣活儲") or t.startswith("活儲")) and not el.find(["tr", "li"]):
+            print("      活儲列原始內容：" + re.sub(r"\s+", " ", str(el))[:700])
+            break
+    if not rated:                   # 沒有可用的表格：印出頁面上相關的文字，看版面長什麼樣子
         for tag in soup(["script", "style", "noscript"]):
             tag.decompose()
         lines = [norm(x) for x in soup.get_text("\n").split("\n")]
@@ -338,6 +352,10 @@ def fetch_rendered(url):
         try:
             page = browser.new_page(locale="zh-TW")
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            try:                    # 有些頁面分好幾次載入資料，先等網路連線都安靜下來
+                page.wait_for_load_state("networkidle", timeout=15000)
+            except Exception:       # noqa: BLE001
+                pass
             try:
                 page.wait_for_function(WAIT_JS, timeout=20000)
             except Exception:       # noqa: BLE001  等不到就照樣取回，交給後面的檢查與診斷
@@ -369,7 +387,7 @@ def read_bank(cfg):
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 8，共 %d 家銀行" % len(BANKS))
+    print("抓取程式版本 11，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
