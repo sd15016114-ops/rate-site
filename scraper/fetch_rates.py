@@ -28,7 +28,8 @@ TPE = timezone(timedelta(hours=8))
 HEADERS = {"User-Agent": "RateSiteBot/0.1 (daily deposit-rate check; contact: YOUR_EMAIL)"}
 TENORS = (1, 3, 6, 9, 12, 24, 36)          # 要保留的存期（月）
 REQUIRED_TIME = (1, 3, 6, 12)              # 定期存款至少要抓到這些存期才算成功
-SKIP_WORDS = ("萬", "億", "大額", "證券", "証券", "薪資", "薪轉", "數位", "親子", "學生")
+SKIP_WORDS = ("證券", "証券", "薪資", "薪轉", "數位", "親子", "學生")   # 特殊帳戶，不是一般牌告
+NOT_LARGE = ("未達", "以下", "以內", "未滿")                              # 「未達三百萬」是一般額度
 
 # ---------------------------------------------------------------- 銀行設定
 # 銀行清單放在 scraper/banks.json，新增銀行只要在那裡加一筆 id、name、url。
@@ -54,6 +55,23 @@ def cn_to_int(s):
         a, _, b = s.partition("十")
         return (CN.get(a, 1) if a else 1) * 10 + (CN.get(b, 0) if b else 0)
     return CN.get(s)
+
+
+def is_large(text):
+    """是不是大額存款的列或類別（含「萬」「億」但不是「未達／以下」這類一般額度）。"""
+    if "大額" in text:
+        return True
+    return ("萬" in text or "億" in text) and not any(w in text for w in NOT_LARGE)
+
+
+def clean_label(c):
+    """把儲存格整理成純中文標籤：去掉括號內容、英文對照、「利率」字尾與「新臺幣」字首。"""
+    prev = None
+    while prev != c:
+        prev, c = c, re.sub(r"\([^()]*\)", "", c)
+    c = re.sub(r"[A-Za-z]+", "", c).strip("~-/:.,、")
+    c = re.sub(r"利率$", "", c)
+    return re.sub(r"^(新臺幣|新台幣|臺幣|台幣)", "", c)
 
 
 def tenor_months(label):
@@ -89,6 +107,10 @@ HAS_CJK = re.compile(r"[\u4e00-\u9fff]")
 
 def table_heading(table):
     """找出表格上方最近的一段標題文字（例如「定存」「300萬元以下定期存款利率」）。"""
+    cap = table.find("caption")
+    if cap is not None and norm(cap.get_text()):
+        t = norm(cap.get_text())
+        return t if len(t) <= 30 else ""
     for text in table.find_all_previous(string=True, limit=40):
         t = norm(text)
         if not t or not HAS_CJK.search(t) or any(w in t for w in HEADING_NOISE):
@@ -99,7 +121,8 @@ def table_heading(table):
 
 def heading_category(h):
     """有些銀行每種存款各一張表，類別寫在表格上方的標題，而不是表格裡。"""
-    if any(w in h for w in ("大額", "優利", "可轉讓", "存單", "郵政", "專案", "外幣", "放款")):
+    if is_large(h) or any(w in h for w in ("優利", "可轉讓", "存單", "郵政", "專案", "外幣", "放款",
+                                             "分期", "零存", "存本", "試算")):
         return None
     if "定期儲蓄" in h or "定儲" in h:
         return "savings"
@@ -108,28 +131,49 @@ def heading_category(h):
     return None
 
 
+def split_cells(text):
+    """清單式版面常把「一個月 1.2250 1.2250」寫在同一段文字裡：把數字拆成獨立的格子，
+    其餘文字合併成標籤（「一 個 月」這種中間有空白的寫法也能還原）。"""
+    out, buf = [], []
+    for tok in text.split():
+        if RATE.match(tok) or tok in ("-", "--"):
+            if buf:
+                out.append(norm("".join(buf)))
+                buf = []
+            out.append(tok)
+        else:
+            buf.append(tok)
+    if buf:
+        out.append(norm("".join(buf)))
+    return out
+
+
 def extract_rows(html):
     """回傳頁面上所有「列」，每列是一串已正規化的儲存格文字。
-    每張表格開始前會多一列 ["§", 表格標題]，讓解析時知道換了一張表。
-    以 <tr> 為主；沒有表格的頁面改讀 <li>。"""
+    表格的 <tr> 和清單的 <li> 都算一列（有些銀行用清單排版利率表）。
+    每張表格或每個清單開始前會多一列 ["§", 標題]，讓解析時知道換了一區。"""
     soup = make_soup(html)
     rows, seen = [], set()
-    for tr in soup.find_all("tr"):
-        table = tr.find_parent("table")
-        if table is not None and id(table) not in seen:
-            seen.add(id(table))
-            rows.append(["§", table_heading(table)])
-        # 取屬於這一列的儲存格：包含被 <font>、<span> 等標籤包住的，但不含巢狀表格裡的
-        cells = [norm(c.get_text()) for c in tr.find_all(["th", "td"]) if c.find_parent("tr") is tr]
-        # 有些頁面把利率數字寫在儲存格外面；儲存格裡找不到利率時，改從整列文字找
-        if cells and not any(RATE.match(c) for c in cells) and not tr.find("tr"):
-            cells += LOOSE_RATE.findall(tr.get_text(" "))
+    for el in soup.find_all(["tr", "li"]):
+        if el.name == "tr":
+            box = el.find_parent("table")
+        else:
+            if el.find("li") or el.find_parent("tr"):       # 只取最內層、且不在表格裡的清單項目
+                continue
+            box = el.find_parent(["ul", "ol"])
+        if box is not None and id(box) not in seen:
+            seen.add(id(box))
+            rows.append(["§", table_heading(box)])
+        if el.name == "tr":
+            # 取屬於這一列的儲存格：包含被 <font>、<span> 等標籤包住的，但不含巢狀表格裡的
+            cells = [norm(c.get_text()) for c in el.find_all(["th", "td"]) if c.find_parent("tr") is el]
+            # 有些頁面把利率數字寫在儲存格外面；儲存格裡找不到利率時，改從整列文字找
+            if cells and not any(RATE.match(c) for c in cells) and not el.find("tr"):
+                cells += LOOSE_RATE.findall(el.get_text(" "))
+        else:
+            cells = [c for text in el.stripped_strings for c in split_cells(text)]
         rows.append(cells)
-    rows = [r for r in rows if any(r)]
-    if not any(r[0] != "§" for r in rows):
-        rows = [[norm(s) for s in li.stripped_strings] for li in soup.find_all("li")]
-        rows = [r for r in rows if any(r)]
-    return rows
+    return [r for r in rows if any(r)]
 
 
 def debug_rows(html, rows):
@@ -140,9 +184,20 @@ def debug_rows(html, rows):
     hits = [r for r in rows if any(k in c for c in r for k in keys)]
     for r in (hits or rows)[:28]:
         print("      | " + " | ".join(c[:24] for c in r[:7]))
-    if len(rows) < 5:               # 幾乎沒有表格：印出頁面開頭文字，看是不是被擋或換了網址
-        text = norm(make_soup(html).get_text(" "))
-        print("      頁面文字開頭：" + text[:300])
+    if len(hits) < 5:               # 沒有可用的表格：印出頁面上相關的文字，看版面長什麼樣子
+        soup = make_soup(html)
+        for tag in soup(["script", "style", "noscript"]):
+            tag.decompose()
+        lines = [norm(x) for x in soup.get_text("\n").split("\n")]
+        lines = [x for x in lines if x]
+        print("      頁面共 %d 行文字，開頭：%s" % (len(lines), " / ".join(lines[:8])[:200]))
+        idx = [i for i, x in enumerate(lines) if any(k in x for k in ("活期", "活儲", "定期", "定存"))]
+        shown = set()
+        for i in idx[:12]:
+            for j in range(i, min(i + 6, len(lines))):
+                if j not in shown:
+                    shown.add(j)
+                    print("      %4d: %s" % (j, lines[j][:60]))
 
 
 # ---------------------------------------------------------------- 解析
@@ -154,6 +209,7 @@ def parse_rows(rows, cfg=None):
     d_labels = ["活期存款", "活存"] + cfg.get("demand_labels", [])
 
     fixed_first = True          # 預設欄位順序：固定、機動
+    kind = None                 # 整張表只有固定或只有機動利率時（寫在表格標題上）
     category = None
     out = {"demand": None, "demand_savings": None, "time": {}, "savings": {}}
 
@@ -162,10 +218,12 @@ def parse_rows(rows, cfg=None):
             continue
         # 0) 新的一張表：用表格上方的標題決定類別
         if cells[0] == "§":
-            category = heading_category(cells[1] if len(cells) > 1 else "")
+            h = cells[1] if len(cells) > 1 else ""
+            category = heading_category(h)
+            kind = "fixed" if "固定" in h and "機動" not in h else "floating" if "機動" in h and "固定" not in h else None
             continue
 
-        labels = [re.sub(r"^(新臺幣|新台幣|臺幣|台幣)", "", re.sub(r"利率$", "", c)) for c in cells]
+        labels = [clean_label(c) for c in cells]
         nums = [float(c.rstrip("%")) for c in cells if RATE.match(c)]
 
         # 1) 表頭列：判斷固定／機動哪一欄在前（每張表各自判斷）
@@ -177,32 +235,36 @@ def parse_rows(rows, cfg=None):
             continue
 
         # 2) 類別（定期存款／定期儲蓄存款）；有 rowspan 的表格只在第一列出現，所以要記住
-        for c in labels:
-            if c in categories:
-                category = categories[c]
+        for raw, lab in zip(cells, labels):
+            if lab in categories:
+                category = None if is_large(raw) else categories[lab]
                 break
 
         # 3) 大額、薪轉、證券戶等一律略過
-        if any(w in c for c in cells for w in SKIP_WORDS):
+        if any(is_large(c) for c in cells) or any(w in lab for lab in labels for w in SKIP_WORDS):
             continue
 
         tenor = next((t for t in (tenor_months(c) for c in labels) if t), None)
 
         # 4) 活期利率
         if tenor is None and nums:
-            if out["demand_savings"] is None and any(c in ds_labels for c in labels):
+            if out["demand_savings"] is None and any(c in ds_labels for c in labels + cells):
                 out["demand_savings"] = nums[0]
                 continue
-            if out["demand"] is None and any(c in d_labels for c in labels):
+            if out["demand"] is None and any(c in d_labels for c in labels + cells):
                 out["demand"] = nums[0]
                 continue
 
         # 5) 定存利率
         if tenor is not None and category and nums:
-            if tenor in TENORS and str(tenor) not in out[category]:
-                a, b = (nums[0], nums[1]) if len(nums) >= 2 else (nums[0], nums[0])
-                fixed, floating = (a, b) if fixed_first else (b, a)
-                out[category][str(tenor)] = {"fixed": fixed, "floating": floating}
+            key = str(tenor)
+            if tenor in TENORS:
+                if kind:                                  # 固定、機動分成兩張表：各填各的
+                    out[category].setdefault(key, {}).setdefault(kind, nums[0])
+                elif key not in out[category]:
+                    a, b = (nums[0], nums[1]) if len(nums) >= 2 else (nums[0], nums[0])
+                    fixed, floating = (a, b) if fixed_first else (b, a)
+                    out[category][key] = {"fixed": fixed, "floating": floating}
             continue
 
         # 6) 第一格是不認得的項目名稱 → 離開目前類別，避免把別的表誤認成定存
@@ -210,6 +272,11 @@ def parse_rows(rows, cfg=None):
         if first and first not in categories and tenor is None:
             category = None
 
+    # 只抓到固定或機動其中一種時，另一種用同一個數字補上
+    for group in (out["time"], out["savings"]):
+        for r in group.values():
+            r.setdefault("fixed", r.get("floating"))
+            r.setdefault("floating", r.get("fixed"))
     return out
 
 
@@ -302,7 +369,7 @@ def read_bank(cfg):
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 6，共 %d 家銀行" % len(BANKS))
+    print("抓取程式版本 8，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
