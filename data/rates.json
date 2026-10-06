@@ -1,0 +1,236 @@
+{
+  "updated": "2026-10-06T13:52:47+08:00",
+  "banks": [
+    {
+      "id": "bot",
+      "name": "臺灣銀行",
+      "source": "https://rate.bot.com.tw/twd?Lang=zh-TW",
+      "demand": 0.705,
+      "demand_savings": 0.825,
+      "time": {
+        "36": {
+          "fixed": 1.745,
+          "floating": 1.745
+        },
+        "24": {
+          "fixed": 1.73,
+          "floating": 1.73
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.69
+        },
+        "9": {
+          "fixed": 1.58,
+          "floating": 1.575
+        },
+        "6": {
+          "fixed": 1.465,
+          "floating": 1.46
+        },
+        "3": {
+          "fixed": 1.29,
+          "floating": 1.285
+        },
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        }
+      },
+      "savings": {
+        "36": {
+          "fixed": 1.785,
+          "floating": 1.785
+        },
+        "24": {
+          "fixed": 1.75,
+          "floating": 1.75
+        },
+        "12": {
+          "fixed": 1.725,
+          "floating": 1.715
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-06T13:52:47+08:00"
+    },
+    {
+      "id": "land",
+      "name": "土地銀行",
+      "source": "https://rate.landbank.com.tw/zh-TW/TWDInfo?mid=23",
+      "demand": 0.705,
+      "demand_savings": 0.825,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.285,
+          "floating": 1.285
+        },
+        "6": {
+          "fixed": 1.46,
+          "floating": 1.46
+        },
+        "9": {
+          "fixed": 1.575,
+          "floating": 1.575
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.7
+        },
+        "24": {
+          "fixed": 1.705,
+          "floating": 1.71
+        },
+        "36": {
+          "fixed": 1.715,
+          "floating": 1.72
+        }
+      },
+      "savings": {
+        "12": {
+          "fixed": 1.725,
+          "floating": 1.725
+        },
+        "24": {
+          "fixed": 1.735,
+          "floating": 1.74
+        },
+        "36": {
+          "fixed": 1.745,
+          "floating": 1.75
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-06T13:52:47+08:00"
+    },
+    {
+      "id": "tcb",
+      "name": "合作金庫",
+      "source": "https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/deposit-rate/deposit-loans-rate/twd-deposit-rate",
+      "demand": 0.705,
+      "demand_savings": 0.825,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.285,
+          "floating": 1.285
+        },
+        "6": {
+          "fixed": 1.465,
+          "floating": 1.46
+        },
+        "9": {
+          "fixed": 1.58,
+          "floating": 1.575
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.69
+        },
+        "24": {
+          "fixed": 1.705,
+          "floating": 1.705
+        },
+        "36": {
+          "fixed": 1.71,
+          "floating": 1.71
+        }
+      },
+      "savings": {
+        "12": {
+          "fixed": 1.725,
+          "floating": 1.715
+        },
+        "24": {
+          "fixed": 1.73,
+          "floating": 1.73
+        },
+        "36": {
+          "fixed": 1.745,
+          "floating": 1.745
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-06T13:52:47+08:00"
+    },
+    {
+      "id": "chb",
+      "name": "彰化銀行",
+      "source": "https://www.bankchb.com/frontend/G0210_020104_query.jsp",
+      "status": "failed",
+      "error": "找不到活期儲蓄存款利率"
+    },
+    {
+      "id": "fcb",
+      "name": "第一銀行",
+      "source": "https://ebank.firstbank.com.tw/BATcpibWeb/html/FQ1001.html",
+      "demand": 0.705,
+      "demand_savings": 0.855,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.285,
+          "floating": 1.285
+        },
+        "6": {
+          "fixed": 1.435,
+          "floating": 1.435
+        },
+        "9": {
+          "fixed": 1.545,
+          "floating": 1.545
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.69
+        },
+        "24": {
+          "fixed": 1.715,
+          "floating": 1.715
+        },
+        "36": {
+          "fixed": 1.715,
+          "floating": 1.715
+        }
+      },
+      "savings": {
+        "12": {
+          "fixed": 1.755,
+          "floating": 1.715
+        },
+        "24": {
+          "fixed": 1.76,
+          "floating": 1.895
+        },
+        "36": {
+          "fixed": 1.77,
+          "floating": 1.895
+        },
+        "3": {
+          "fixed": 0.745,
+          "floating": 0.745
+        },
+        "6": {
+          "fixed": 0.795,
+          "floating": 0.785
+        },
+        "9": {
+          "fixed": 0.825,
+          "floating": 0.815
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-06T13:52:47+08:00"
+    }
+  ]
+}
