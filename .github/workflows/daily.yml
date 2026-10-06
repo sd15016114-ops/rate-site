@@ -1,0 +1,33 @@
+name: 每日更新利率
+
+on:
+  schedule:
+    - cron: "30 1 * * *"   # UTC 01:30 = 台灣時間 09:30
+  workflow_dispatch:        # 也可以在 GitHub 網頁上手動執行
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scraper/requirements.txt
+      - name: 抓取利率
+        id: fetch
+        run: python scraper/fetch_rates.py
+        continue-on-error: true      # 有銀行失敗時仍然提交其他銀行的資料
+      - name: 提交變更
+        run: |
+          git config user.name "rate-bot"
+          git config user.email "rate-bot@users.noreply.github.com"
+          git add data/rates.json
+          git diff --cached --quiet || git commit -m "利率更新 $(date -u +%F)"
+          git push
+      - name: 有銀行抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
+        if: steps.fetch.outcome == 'failure'
+        run: exit 1
