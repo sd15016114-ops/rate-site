@@ -17,6 +17,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r scraper/requirements.txt
+      - name: 安裝瀏覽器（給動態載入的銀行頁面用）
+        run: python -m playwright install --with-deps chromium
       - name: 抓取利率
         id: fetch
         run: python scraper/fetch_rates.py
