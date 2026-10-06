@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-06T14:24:29+08:00",
+  "updated": "2026-10-06T14:31:53+08:00",
   "banks": [
     {
       "id": "bot",
@@ -52,7 +52,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-06T14:24:29+08:00"
+      "fetched": "2026-10-06T14:31:53+08:00"
     },
     {
       "id": "land",
@@ -105,7 +105,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-06T14:24:29+08:00"
+      "fetched": "2026-10-06T14:31:53+08:00"
     },
     {
       "id": "tcb",
@@ -158,14 +158,60 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-06T14:24:29+08:00"
+      "fetched": "2026-10-06T14:31:53+08:00"
     },
     {
       "id": "chb",
       "name": "彰化銀行",
       "source": "https://www.bankchb.com/frontend/G0210_020104_query.jsp",
-      "status": "stale",
-      "error": "找不到活期儲蓄存款利率"
+      "demand": 0.705,
+      "demand_savings": 0.855,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.285,
+          "floating": 1.285
+        },
+        "6": {
+          "fixed": 1.435,
+          "floating": 1.435
+        },
+        "9": {
+          "fixed": 1.545,
+          "floating": 1.545
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.69
+        },
+        "24": {
+          "fixed": 1.71,
+          "floating": 1.715
+        },
+        "36": {
+          "fixed": 1.715,
+          "floating": 1.715
+        }
+      },
+      "savings": {
+        "12": {
+          "fixed": 1.755,
+          "floating": 1.715
+        },
+        "24": {
+          "fixed": 1.76,
+          "floating": 1.795
+        },
+        "36": {
+          "fixed": 1.77,
+          "floating": 1.895
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-06T14:31:53+08:00"
     },
     {
       "id": "fcb",
@@ -230,7 +276,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-06T14:24:29+08:00"
+      "fetched": "2026-10-06T14:31:53+08:00"
     }
   ]
 }
