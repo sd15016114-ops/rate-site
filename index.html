@@ -148,6 +148,7 @@ footer p{margin:0 0 6px;max-width:50em}
         <label><input type="checkbox" id="fNew" checked> 新戶限定方案</label>
         <label><input type="checkbox" id="fTask" checked> 需完成任務的方案</label>
         <label><input type="checkbox" id="fPay"> 薪轉戶方案</label>
+        <label><input type="checkbox" id="fVip"> 理財貴賓方案</label>
       </div>
     </div>
   </section>
@@ -190,6 +191,7 @@ footer p{margin:0 0 6px;max-width:50em}
   <footer>
     <p>資料來源為各銀行官方網站，每日自動擷取牌告利率；活動利率經人工確認後更新，並附上最後確認日期。</p>
     <p>實際利率與條件以各銀行公告為準。本站僅整理公開資訊供參考，不構成任何理財建議。</p>
+      <p><a href="admin.html" style="color:inherit">管理活動利率</a></p>
   </footer>
 </div>
 
@@ -197,7 +199,9 @@ footer p{margin:0 0 6px;max-width:50em}
 /* ===== 資料：讀取每日抓取的 data/rates.json 與人工維護的 data/promos.json ===== */
 var TENORS = [1,3,6,12,24,36];
 var BANKS = [], PROMOS = [];
-var WHO = {open:'不限', new:'新戶限定', task:'需完成任務', pay:'薪轉戶'};
+var WHO = {open:'不限', new:'新戶限定', task:'需完成任務', pay:'薪轉戶', vip:'理財貴賓'};
+/* 額度說明：有最低金額時寫成「75 萬以上、300 萬內」 */
+function range(p){ return (p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'; }
 var PUBLIC = ['bot','land','tcb','fcb','hncb','chb','mega','tbb'], ONLINE = ['next','line','rakuten'];
 
 function bank(id){ for(var i=0;i<BANKS.length;i++) if(BANKS[i].id===id) return BANKS[i]; }
@@ -247,6 +251,7 @@ function options(amount, months, allow){
   PROMOS.forEach(function(p){
     var b = bank(p.bank);
     if(!b || !allow[p.who] || b.demand==null) return;
+    if(p.min && amount < p.min*10000) return;      /* 未達最低金額，不適用 */
     var cap = p.cap*10000, inCap = Math.min(amount,cap), over = amount-inCap, interest;
     if(p.type==='活存'){
       var pm = Math.min(months,p.months);
@@ -257,7 +262,7 @@ function options(amount, months, allow){
       interest = inCap*p.rate/100*p.months/12 + over*fx/100*p.months/12 + amount*b.demand/100*(months-p.months)/12;
     }
     list.push({id:b.id, bank:b.name, plan:p.name, promo:true, rate:p.rate, interest:interest,
-      tags:[p.type, p.cap+' 萬內', p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期'].concat(p.who!=='open'?[WHO[p.who]]:[])});
+      tags:[p.type, range(p), p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期'].concat(p.who!=='open'?[WHO[p.who]]:[])});
   });
   list.sort(function(a,b){ return b.interest-a.interest; });
   return list;
@@ -265,7 +270,7 @@ function options(amount, months, allow){
 function state(){
   var wan = parseFloat($('amt').value);
   return {wan:wan, ok:wan>0, amount:wan*10000, months:parseInt($('mon').value,10),
-    allow:{open:true, new:$('fNew').checked, task:$('fTask').checked, pay:$('fPay').checked}};
+    allow:{open:true, new:$('fNew').checked, task:$('fTask').checked, pay:$('fPay').checked, vip:$('fVip').checked}};
 }
 
 /* ===== 精選方案：利息最高的 4 家 ===== */
@@ -310,14 +315,14 @@ function renderBanks(st, list){
       + '<div class="fig">定存 '+span(st.months)+'<b>'+pct(b.fixed[ti])+'</b></div>'
       + '<div class="fig earn">'+(top?'最多可拿<b>'+money(top.interest)+' 元</b>':'<b>&nbsp;</b>')+'</div>'
       + '<span class="chev" aria-hidden="true">›</span>'
-      + promos.map(function(p){ return '<div class="gift">🎁 '+esc(p.name)+'：'+p.cap+' 萬內 '+pct(p.rate)+(p.who!=='open'?'（'+WHO[p.who]+'）':'')+'</div>'; }).join('')
+      + promos.map(function(p){ return '<div class="gift">🎁 '+esc(p.name)+'：'+range(p)+' '+pct(p.rate)+(p.who!=='open'?'（'+WHO[p.who]+'）':'')+'</div>'; }).join('')
       + '</summary><div class="more-info">'
       + (top?'<p>以你的條件，最划算的是「'+esc(top.plan)+'」。</p>':'')
       + '<h3>牌告利率（年息 %，固定利率）</h3><div class="scroll"><table><tr><th>活期儲蓄</th>'
       + TENORS.map(function(t){ return '<th>'+span(t)+'</th>'; }).join('') + '</tr><tr><td>'+num(b.demand)+'</td>'
       + b.fixed.map(function(x){ return '<td>'+num(x)+'</td>'; }).join('') + '</tr></table></div>'
       + (promos.length ? '<h3>活動優惠</h3><ul>'+promos.map(function(p){
-          return '<li><b>'+esc(p.name)+'</b>（'+p.type+'）：'+p.cap+' 萬內 '+pct(p.rate)+'，'+(p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期')
+          return '<li><b>'+esc(p.name)+'</b>（'+p.type+'）：'+range(p)+' '+pct(p.rate)+'，'+(p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期')
             +'。資格：'+WHO[p.who]+'，'+esc(p.cond)+'。活動到 '+esc(p.end)+'，最後確認 '+esc(p.checked)+'。'
             +(p.url?' <a href="'+esc(p.url)+'" target="_blank" rel="noopener">活動頁面</a>':'')+'</li>'; }).join('')+'</ul>' : '')
       + '<p class="fine">'+(b.fetched?'利率擷取時間 '+day(b.fetched)+'。':'')
@@ -331,7 +336,7 @@ function render(){
   var st = state(), list = st.ok ? options(st.amount, st.months, st.allow) : [];
   renderPicks(st, list); renderBanks(st, list);
 }
-['amt','mon','fNew','fTask','fPay','need','sort','bankSearch'].forEach(function(id){ $(id).addEventListener('input',render); });
+['amt','mon','fNew','fTask','fPay','fVip','need','sort','bankSearch'].forEach(function(id){ $(id).addEventListener('input',render); });
 
 /* 記住上次填的金額與期間（只存在這台裝置） */
 try{
