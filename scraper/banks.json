@@ -1,0 +1,9 @@
+[
+  {"id": "bot", "name": "臺灣銀行", "url": "https://rate.bot.com.tw/twd?Lang=zh-TW"},
+  {"id": "land", "name": "土地銀行", "url": "https://rate.landbank.com.tw/zh-TW/TWDInfo?mid=23"},
+  {"id": "tcb", "name": "合作金庫", "url": "https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/deposit-rate/deposit-loans-rate/twd-deposit-rate", "categories": {"儲蓄存款": "savings"}, "demand_savings_labels": ["一般活儲"]},
+  {"id": "chb", "name": "彰化銀行", "url": "https://www.bankchb.com/frontend/G0210_020104_query.jsp", "render": true},
+  {"id": "fcb", "name": "第一銀行", "url": "https://ebank.firstbank.com.tw/BATcpibWeb/html/FQ1001.html"},
+  {"id": "mega", "name": "兆豐銀行", "url": "https://www.megabank.com.tw/personal/savings/deposit-service/rate/twd-rate", "render": true},
+  {"id": "tbb", "name": "臺灣企銀", "url": "https://www.tbb.com.tw/zh-tw/personal/deposits/inquiry/twd-interest-calculator"}
+]
