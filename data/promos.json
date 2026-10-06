@@ -1,0 +1,5 @@
+[
+  {"bank": "hsbc", "name": "One能戶新臺幣優利活存", "type": "活存", "rate": 1.88, "cap": 300, "months": 3, "who": "new", "cond": "活動期間新開立運籌理財One能戶數位帳戶；當日餘額須達75萬元才適用", "end": "2026/12/31", "checked": "2026/10/06", "min": 75, "url": "https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#one"},
+  {"bank": "hsbc", "name": "One能戶新臺幣優利活存（200萬以上）", "type": "活存", "rate": 2.18, "cap": 300, "months": 3, "who": "new", "cond": "活動期間新開立運籌理財One能戶數位帳戶；當日餘額須達200萬元才適用", "end": "2026/12/31", "checked": "2026/10/06", "min": 200, "url": "https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#one"},
+  {"bank": "hsbc", "name": "新臺幣優利定存（新資金）", "type": "定存", "rate": 2.2, "cap": 3000, "months": 6, "who": "vip", "cond": "限卓越理財客戶（往來資產達300萬元），限30天內自他行轉入的新資金，須臨櫃或電話辦理", "end": "2026/12/31", "checked": "2026/10/06", "min": 100, "url": "https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#NTDUTDA"}
+]
