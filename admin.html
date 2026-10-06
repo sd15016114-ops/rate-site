@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>管理活動利率｜利率試算站</title>
+<style>
+:root{
+  --paper:#F2F6F3; --sheet:#FFFFFF; --ink:#17262B; --muted:#5B6E6C;
+  --rule:#CFDDD6; --green:#0E5E4E; --green-soft:#DCEBE4; --seal:#C23A2E;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --serif:"Noto Serif TC","PMingLiU","Songti TC",serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1A19; --sheet:#162523; --ink:#E6EFEA; --muted:#94A9A3;
+    --rule:#2A3F3A; --green:#5FC2A6; --green-soft:#1D3530; --seal:#F0705F;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1A19; --sheet:#162523; --ink:#E6EFEA; --muted:#94A9A3;
+  --rule:#2A3F3A; --green:#5FC2A6; --green-soft:#1D3530; --seal:#F0705F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;font-variant-numeric:tabular-nums}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+
+
+
+.wrap{max-width:820px}
+h1{font-size:24px;margin:24px 0 4px}
+h2{font-size:18px;margin:32px 0 8px}
+p.lead{margin:0 0 12px;color:var(--muted);font-size:15px}
+a{color:var(--green)}
+.card{background:var(--sheet);border:1px solid var(--rule);padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px}
+.grid .wide{grid-column:1 / -1}
+label{display:block;font-size:13px;color:var(--muted)}
+label small{font-size:12px}
+input,select,textarea{display:block;width:100%;margin-top:4px;font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 10px}
+textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-height:200px;white-space:pre}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+button{font:inherit;font-size:15px;padding:8px 18px;border-radius:4px;border:1px solid var(--green);background:var(--green);color:var(--sheet);cursor:pointer}
+button.ghost{background:none;color:var(--green)}
+button.small{font-size:13px;padding:4px 10px}
+.item{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule)}
+.item:last-child{border-bottom:0}
+.item b{font-size:16px}
+.item .meta{font-size:14px;color:var(--muted)}
+.item .acts{display:flex;gap:6px;flex-shrink:0}
+.expired{color:var(--seal)}
+.msg{font-size:14px;color:var(--green);margin-top:8px;min-height:1.4em}
+ol{padding-left:1.3em;font-size:15px}
+ol li{margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>管理活動利率</h1>
+  <p class="lead">在這裡新增或修改活動，完成後把最下方產生的內容貼到 GitHub，網站就會更新。<a href="./">回到利率試算站</a></p>
+
+  <h2 id="formTitle">新增活動</h2>
+  <div class="card">
+    <div class="grid">
+      <label>銀行<select id="f_bank"></select></label>
+      <label>方案名稱<input id="f_name" placeholder="例如：數位帳戶新戶優惠"></label>
+      <label>類型<select id="f_type"><option>活存</option><option>定存</option></select></label>
+      <label>年利率（%）<input id="f_rate" type="number" step="0.001" min="0" max="20" inputmode="decimal" placeholder="例如：2.5"></label>
+      <label>額度上限（萬元）<small>超過的部分回到牌告利率</small><input id="f_cap" type="number" min="0" step="1" inputmode="numeric" placeholder="例如：10"></label>
+      <label>最低金額（萬元）<small>沒有門檻就留空</small><input id="f_min" type="number" min="0" step="1" inputmode="numeric"></label>
+      <label id="l_months">優惠可享幾個月<input id="f_months" type="number" min="1" max="60" step="1" inputmode="numeric" placeholder="例如：6"></label>
+      <label id="l_term" hidden>定存存期<select id="f_term"><option value="1">1 個月</option><option value="3">3 個月</option><option value="6">6 個月</option><option value="12">1 年</option><option value="24">2 年</option><option value="36">3 年</option></select></label>
+      <label>適用資格<select id="f_who"><option value="open">不限</option><option value="new">新戶限定</option><option value="task">需完成任務</option><option value="pay">薪轉戶</option><option value="vip">理財貴賓</option></select></label>
+      <label>活動截止日<input id="f_end" type="date"></label>
+      <label class="wide">條件說明<input id="f_cond" placeholder="例如：首次開立數位帳戶，每月需登入 App 一次"></label>
+      <label class="wide">活動頁面網址<small>選填</small><input id="f_url" type="url" placeholder="https://"></label>
+    </div>
+    <div class="btns">
+      <button type="button" id="saveBtn">加入清單</button>
+      <button type="button" class="ghost" id="resetBtn">清空表單</button>
+    </div>
+    <div class="msg" id="formMsg"></div>
+  </div>
+
+  <h2>目前的活動</h2>
+  <div class="card" id="list"></div>
+
+  <h2>更新到網站</h2>
+  <div class="card">
+    <ol>
+      <li>按下方的「複製內容」。</li>
+      <li>打開 <a id="ghLink" href="#" target="_blank" rel="noopener">GitHub 上的 promos.json</a>，按鉛筆圖示，全選後貼上，按 Commit changes。<span id="ghNew"></span></li>
+      <li>等一兩分鐘，重新整理利率試算站就會看到。</li>
+    </ol>
+    <textarea id="out" readonly aria-label="promos.json 內容"></textarea>
+    <div class="btns"><button type="button" id="copyBtn">複製內容</button></div>
+    <div class="msg" id="copyMsg"></div>
+  </div>
+  <p class="lead" style="margin:16px 0 40px">尚未貼到 GitHub 的修改會暫存在這台裝置的瀏覽器裡。<button type="button" class="ghost small" id="reloadBtn">放棄修改，重新讀取網站上的資料</button></p>
+</div>
+<script>
+function $(id){ return document.getElementById(id); }
+function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function span(m){ return m>=12 && m%12===0 ? (m/12)+' 年' : m+' 個月'; }
+var WHO = {open:'不限', new:'新戶限定', task:'需完成任務', pay:'薪轉戶', vip:'理財貴賓'};
+var KEY = 'rate-site-promos-draft', BANKS = [], PROMOS = [], editing = -1;
+
+function repo(){
+  var m = location.hostname.match(/^([^.]+)\.github\.io$/), r = location.pathname.split('/')[1];
+  return m && r ? {user:m[1], name:r} : null;
+}
+function getJSON(url){ return fetch(url,{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
+function load(file){
+  var g = repo(), local = 'data/'+file;
+  return g ? getJSON('https://raw.githubusercontent.com/'+g.user+'/'+g.name+'/main/data/'+file).catch(function(){ return getJSON(local); }) : getJSON(local);
+}
+function today(){ var d = new Date(); function p(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate()); }
+function bankName(id){ for(var i=0;i<BANKS.length;i++) if(BANKS[i].id===id) return BANKS[i].name; return id; }
+
+function syncType(){
+  var fixed = $('f_type').value==='定存';
+  $('l_term').hidden = !fixed; $('l_months').hidden = fixed;
+}
+function clearForm(){
+  editing = -1;
+  ['f_name','f_rate','f_cap','f_min','f_months','f_end','f_cond','f_url'].forEach(function(id){ $(id).value=''; });
+  $('f_type').value='活存'; $('f_who').value='open'; $('f_term').value='12'; syncType();
+  $('formTitle').textContent='新增活動'; $('saveBtn').textContent='加入清單';
+}
+function fillForm(i){
+  var p = PROMOS[i]; editing = i;
+  $('f_bank').value=p.bank; $('f_name').value=p.name; $('f_type').value=p.type; $('f_rate').value=p.rate;
+  $('f_cap').value=p.cap; $('f_min').value=p.min||''; $('f_who').value=p.who; $('f_cond').value=p.cond||'';
+  $('f_end').value=(p.end||'').replace(/\//g,'-'); $('f_url').value=p.url||'';
+  if(p.type==='定存') $('f_term').value=String(p.months); else $('f_months').value=p.months;
+  syncType();
+  $('formTitle').textContent='修改活動'; $('saveBtn').textContent='儲存修改';
+  $('formTitle').scrollIntoView({behavior:'smooth'});
+}
+function readForm(){
+  var type = $('f_type').value, rate = parseFloat($('f_rate').value), cap = parseFloat($('f_cap').value),
+      min = parseFloat($('f_min').value), months = parseInt(type==='定存'?$('f_term').value:$('f_months').value,10);
+  if(!$('f_name').value.trim()) return '請填寫方案名稱。';
+  if(!(rate>0 && rate<20)) return '請填寫年利率，例如 2.5。';
+  if(!(cap>0)) return '請填寫額度上限（萬元）。沒有上限的話可以填一個很大的數字，例如 99999。';
+  if(min>0 && min>cap) return '最低金額不能大於額度上限。';
+  if(!(months>0)) return '請填寫優惠可享幾個月。';
+  if(!$('f_end').value) return '請選擇活動截止日。';
+  var p = {bank:$('f_bank').value, name:$('f_name').value.trim(), type:type, rate:rate, cap:cap, months:months,
+           who:$('f_who').value, cond:$('f_cond').value.trim(), end:$('f_end').value.replace(/-/g,'/'), checked:today()};
+  if(min>0) p.min = min;
+  if($('f_url').value.trim()) p.url = $('f_url').value.trim();
+  return p;
+}
+function render(){
+  var t = today();
+  $('list').innerHTML = PROMOS.length ? PROMOS.map(function(p,i){
+    return '<div class="item"><div><b>'+esc(bankName(p.bank))+'｜'+esc(p.name)+'</b>'
+      + '<div class="meta">'+p.type+' '+p.rate+'%，'+(p.min?p.min+' 萬以上、':'')+p.cap+' 萬內，'
+      + (p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期')+'，'+WHO[p.who]+'</div>'
+      + '<div class="meta'+(p.end<t?' expired':'')+'">到 '+esc(p.end)+(p.end<t?'（已過期，網站不會顯示）':'')+'，最後確認 '+esc(p.checked)+'</div></div>'
+      + '<div class="acts"><button type="button" class="ghost small" data-edit="'+i+'">修改</button>'
+      + '<button type="button" class="ghost small" data-del="'+i+'">刪除</button></div></div>';
+  }).join('') : '<div class="meta">還沒有任何活動。用上面的表單新增第一筆。</div>';
+  $('out').value = '[\n' + PROMOS.map(function(p){ return '  '+JSON.stringify(p); }).join(',\n') + '\n]\n';
+  try{ localStorage.setItem(KEY, JSON.stringify(PROMOS)); }catch(e){}
+}
+$('f_type').addEventListener('change',syncType);
+$('resetBtn').addEventListener('click',function(){ clearForm(); $('formMsg').textContent=''; });
+$('saveBtn').addEventListener('click',function(){
+  var p = readForm();
+  if(typeof p==='string'){ $('formMsg').textContent=p; return; }
+  if(editing>=0) PROMOS[editing]=p; else PROMOS.push(p);
+  $('formMsg').textContent = (editing>=0?'已修改':'已加入')+'「'+p.name+'」。記得到最下方複製內容並貼到 GitHub。';
+  clearForm(); render();
+});
+$('list').addEventListener('click',function(e){
+  var ed = e.target.getAttribute('data-edit'), del = e.target.getAttribute('data-del');
+  if(ed!==null) fillForm(parseInt(ed,10));
+  if(del!==null && confirm('確定刪除「'+PROMOS[del].name+'」？')){ PROMOS.splice(parseInt(del,10),1); clearForm(); render(); }
+});
+$('copyBtn').addEventListener('click',function(){
+  var text = $('out').value;
+  function done(){ $('copyMsg').textContent='已複製。接著到 GitHub 貼上。'; }
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done,function(){ $('out').select(); $('copyMsg').textContent='請手動按 Ctrl+C 複製。'; });
+  else { $('out').select(); try{ document.execCommand('copy'); done(); }catch(e){ $('copyMsg').textContent='請手動按 Ctrl+C 複製。'; } }
+});
+$('reloadBtn').addEventListener('click',function(){
+  if(!confirm('這會放棄尚未貼到 GitHub 的修改，確定嗎？')) return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  location.reload();
+});
+(function(){
+  var g = repo();
+  if(g){
+    $('ghLink').href = 'https://github.com/'+g.user+'/'+g.name+'/edit/main/data/promos.json';
+    $('ghNew').innerHTML = ' 如果顯示找不到檔案，改用<a target="_blank" rel="noopener" href="https://github.com/'+g.user+'/'+g.name+'/new/main/data?filename=promos.json">這個連結建立新檔</a>，貼上後一樣按 Commit changes。';
+  }
+})();
+Promise.all([load('rates.json'), load('promos.json').catch(function(){ return []; })]).then(function(res){
+  BANKS = (res[0].banks||[]).map(function(b){ return {id:b.id, name:b.name}; });
+  $('f_bank').innerHTML = BANKS.map(function(b){ return '<option value="'+esc(b.id)+'">'+esc(b.name)+'</option>'; }).join('');
+  var draft = null;
+  try{ draft = JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  PROMOS = Array.isArray(draft) ? draft : (Array.isArray(res[1]) ? res[1] : []);
+  clearForm(); render();
+}).catch(function(){
+  $('list').innerHTML = '<div class="meta">讀不到銀行資料（data/rates.json），請確認網站已經正常運作。</div>';
+});
+</script>
+</body>
+</html>
