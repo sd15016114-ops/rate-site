@@ -5,5 +5,11 @@
   {"id": "chb", "name": "彰化銀行", "url": "https://www.bankchb.com/frontend/G0210_020104_query.jsp", "render": true},
   {"id": "fcb", "name": "第一銀行", "url": "https://ebank.firstbank.com.tw/BATcpibWeb/html/FQ1001.html"},
   {"id": "mega", "name": "兆豐銀行", "url": "https://www.megabank.com.tw/personal/savings/deposit-service/rate/twd-rate", "render": true},
-  {"id": "tbb", "name": "臺灣企銀", "url": "https://www.tbb.com.tw/zh-tw/personal/deposits/inquiry/twd-interest-calculator"}
+  {"id": "tbb", "name": "臺灣企銀", "url": "https://www.tbb.com.tw/zh-tw/personal/deposits/inquiry/twd-interest-calculator"},
+  {"id": "ctbc", "name": "中國信託", "url": "https://www.ctbcbank.com/twrbo/zh_tw/dep_index/dep_ratequery/dep_tw_rate.html?targetTab=tab1&ctchannel=webban"},
+  {"id": "taishin", "name": "台新銀行", "url": "https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/NTD/", "render": true},
+  {"id": "sinopac", "name": "永豐銀行", "url": "https://bank.sinopac.com/MMA8/bank/html/rate/bank_Interest.html", "render": true},
+  {"id": "obank", "name": "王道銀行", "url": "https://www.o-bank.com/zh-tw/retail/cm/ratemain/cm-deprate", "demand_savings_labels": ["活期(儲)存款"]},
+  {"id": "hsbc", "name": "滙豐（台灣）", "url": "https://www.hsbc.com.tw/handicap-free/deposit-rate/", "demand_savings_labels": ["個人理財活存"]},
+  {"id": "next", "name": "將來銀行", "url": "https://nebweb.nextbank.com.tw/corp/rates", "render": true}
 ]
