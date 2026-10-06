@@ -14,6 +14,7 @@
 """
 import json
 import re
+import unicodedata
 import sys
 import time
 from datetime import datetime, timezone, timedelta
@@ -27,36 +28,23 @@ TPE = timezone(timedelta(hours=8))
 HEADERS = {"User-Agent": "RateSiteBot/0.1 (daily deposit-rate check; contact: YOUR_EMAIL)"}
 TENORS = (1, 3, 6, 9, 12, 24, 36)          # 要保留的存期（月）
 REQUIRED_TIME = (1, 3, 6, 12)              # 定期存款至少要抓到這些存期才算成功
-SKIP_WORDS = ("萬", "億", "以上", "大額", "證券", "証券", "薪資", "薪轉", "數位", "親子", "學生")
+SKIP_WORDS = ("萬", "億", "大額", "證券", "証券", "薪資", "薪轉", "數位", "親子", "學生")
 
 # ---------------------------------------------------------------- 銀行設定
-BANKS = [
-    {"id": "bot", "name": "臺灣銀行",
-     "url": "https://rate.bot.com.tw/twd?Lang=zh-TW"},
-    {"id": "land", "name": "土地銀行",
-     "url": "https://rate.landbank.com.tw/zh-TW/TWDInfo?mid=23"},
-    {"id": "tcb", "name": "合作金庫",
-     "url": "https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/deposit-rate/deposit-loans-rate/twd-deposit-rate",
-     # 合庫的類別欄寫「儲蓄存款」，活儲寫在對象別「一般活儲」
-     "categories": {"儲蓄存款": "savings"},
-     "demand_savings_labels": ["一般活儲"]},
-    {"id": "chb", "name": "彰化銀行",
-     "url": "https://www.bankchb.com/frontend/G0210_020104_query.jsp",
-     # 彰銀的利率是網頁載入後才由程式填入，要用瀏覽器開啟才讀得到
-     "render": True},
-    {"id": "fcb", "name": "第一銀行",
-     "url": "https://ebank.firstbank.com.tw/BATcpibWeb/html/FQ1001.html"},
-]
+# 銀行清單放在 scraper/banks.json，新增銀行只要在那裡加一筆 id、name、url。
+# 可選欄位：render（true 表示一律用瀏覽器開）、categories、demand_savings_labels。
+BANKS = json.loads((Path(__file__).resolve().parent / "banks.json").read_text(encoding="utf-8"))
 
 # ---------------------------------------------------------------- 文字處理
-CN = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
-LEAD_NUM = re.compile(r"^(\d+|[一二三四五六七八九十]+)")
+CN = {"一": 1, "二": 2, "兩": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+LEAD_NUM = re.compile(r"^(\d+|[一二兩三四五六七八九十]+)")
 RATE = re.compile(r"^\d{1,2}\.\d{1,5}%?$")
 
 
 def norm(text):
     """去掉所有空白與全形空白，方便比對「定 期 存 款」這類寫法。"""
-    return re.sub(r"[\s\u3000\xa0]+", "", text or "")
+    text = unicodedata.normalize("NFKC", text or "")     # 全形數字、符號轉成半形
+    return re.sub(r"[\s\u3000\xa0]+", "", text)
 
 
 def cn_to_int(s):
@@ -95,12 +83,42 @@ def make_soup(html):
         return BeautifulSoup(html, "html.parser")
 
 
+HEADING_NOISE = ("資料時間", "單位", "年息", "年利率", "下載", "列印")
+HAS_CJK = re.compile(r"[\u4e00-\u9fff]")
+
+
+def table_heading(table):
+    """找出表格上方最近的一段標題文字（例如「定存」「300萬元以下定期存款利率」）。"""
+    for text in table.find_all_previous(string=True, limit=40):
+        t = norm(text)
+        if not t or not HAS_CJK.search(t) or any(w in t for w in HEADING_NOISE):
+            continue
+        return t if len(t) <= 30 else ""
+    return ""
+
+
+def heading_category(h):
+    """有些銀行每種存款各一張表，類別寫在表格上方的標題，而不是表格裡。"""
+    if any(w in h for w in ("大額", "優利", "可轉讓", "存單", "郵政", "專案", "外幣", "放款")):
+        return None
+    if "定期儲蓄" in h or "定儲" in h:
+        return "savings"
+    if "定期存款" in h or "定存" in h:
+        return "time"
+    return None
+
+
 def extract_rows(html):
     """回傳頁面上所有「列」，每列是一串已正規化的儲存格文字。
+    每張表格開始前會多一列 ["§", 表格標題]，讓解析時知道換了一張表。
     以 <tr> 為主；沒有表格的頁面改讀 <li>。"""
     soup = make_soup(html)
-    rows = []
+    rows, seen = [], set()
     for tr in soup.find_all("tr"):
+        table = tr.find_parent("table")
+        if table is not None and id(table) not in seen:
+            seen.add(id(table))
+            rows.append(["§", table_heading(table)])
         # 取屬於這一列的儲存格：包含被 <font>、<span> 等標籤包住的，但不含巢狀表格裡的
         cells = [norm(c.get_text()) for c in tr.find_all(["th", "td"]) if c.find_parent("tr") is tr]
         # 有些頁面把利率數字寫在儲存格外面；儲存格裡找不到利率時，改從整列文字找
@@ -108,7 +126,7 @@ def extract_rows(html):
             cells += LOOSE_RATE.findall(tr.get_text(" "))
         rows.append(cells)
     rows = [r for r in rows if any(r)]
-    if not rows:
+    if not any(r[0] != "§" for r in rows):
         rows = [[norm(s) for s in li.stripped_strings] for li in soup.find_all("li")]
         rows = [r for r in rows if any(r)]
     return rows
@@ -116,18 +134,15 @@ def extract_rows(html):
 
 def debug_rows(html, rows):
     """抓取失敗時，把可能相關的內容印到紀錄裡，方便判斷頁面長什麼樣子。"""
-    print("      共讀到 %d 列" % len(rows))
-    hits = [r for r in rows if any("活期" in c or "活儲" in c for c in r)]
-    for r in (hits or rows)[:6]:
-        print("      | " + " | ".join(c[:30] for c in r[:8]))
-    soup = make_soup(html)
-    for tr in soup.find_all("tr"):
-        if norm(tr.get_text()).startswith("活期儲蓄存款") and not tr.find("tr"):
-            print("      原始內容：" + re.sub(r"\s+", " ", str(tr))[:900])
-            nxt = tr.find_next_sibling()
-            if nxt is not None:
-                print("      下一個元素：" + re.sub(r"\s+", " ", str(nxt))[:400])
-            break
+    print("      共讀到 %d 列，表格標題：%s" % (
+        len(rows), "、".join(r[1] for r in rows if r[0] == "§" and len(r) > 1 and r[1])[:200]))
+    keys = ("活期", "活儲", "定期", "定存", "儲蓄", "固定", "機動")
+    hits = [r for r in rows if any(k in c for c in r for k in keys)]
+    for r in (hits or rows)[:28]:
+        print("      | " + " | ".join(c[:24] for c in r[:7]))
+    if len(rows) < 5:               # 幾乎沒有表格：印出頁面開頭文字，看是不是被擋或換了網址
+        text = norm(make_soup(html).get_text(" "))
+        print("      頁面文字開頭：" + text[:300])
 
 
 # ---------------------------------------------------------------- 解析
@@ -135,26 +150,31 @@ def parse_rows(rows, cfg=None):
     cfg = cfg or {}
     categories = {"定期存款": "time", "定期儲蓄存款": "savings"}
     categories.update(cfg.get("categories", {}))
-    ds_labels = ["活期儲蓄存款"] + cfg.get("demand_savings_labels", [])
-    d_labels = ["活期存款"]
+    ds_labels = ["活期儲蓄存款", "活期儲蓄", "活儲存款", "活儲"] + cfg.get("demand_savings_labels", [])
+    d_labels = ["活期存款", "活存"] + cfg.get("demand_labels", [])
 
     fixed_first = True          # 預設欄位順序：固定、機動
-    header_seen = False
     category = None
     out = {"demand": None, "demand_savings": None, "time": {}, "savings": {}}
 
     for cells in rows:
-        # 1) 用表頭判斷固定／機動哪一欄在前
-        if not header_seen:
+        if not cells:
+            continue
+        # 0) 新的一張表：用表格上方的標題決定類別
+        if cells[0] == "§":
+            category = heading_category(cells[1] if len(cells) > 1 else "")
+            continue
+
+        labels = [re.sub(r"^(新臺幣|新台幣|臺幣|台幣)", "", re.sub(r"利率$", "", c)) for c in cells]
+        nums = [float(c.rstrip("%")) for c in cells if RATE.match(c)]
+
+        # 1) 表頭列：判斷固定／機動哪一欄在前（每張表各自判斷）
+        if not nums and any("固定" in c or "機動" in c for c in cells):
             fi = next((i for i, c in enumerate(cells) if "固定" in c), None)
             mi = next((i for i, c in enumerate(cells) if "機動" in c), None)
             if fi is not None and mi is not None and fi != mi:
                 fixed_first = fi < mi
-                header_seen = True
-                continue
-
-        labels = [re.sub(r"利率$", "", c) for c in cells]
-        nums = [float(c.rstrip("%")) for c in cells if RATE.match(c)]
+            continue
 
         # 2) 類別（定期存款／定期儲蓄存款）；有 rowspan 的表格只在第一列出現，所以要記住
         for c in labels:
@@ -236,9 +256,9 @@ def fetch(url):
 
 
 # 等到「活期儲蓄存款」那一列出現利率數字，才算頁面載入完成
-WAIT_JS = r"""() => [...document.querySelectorAll('tr')].some(tr => {
-    const t = tr.innerText.replace(/\s/g, '');
-    return t.startsWith('活期儲蓄存款') && /\d\.\d{2,}/.test(t);
+WAIT_JS = r"""() => [...document.querySelectorAll('tr, li')].some(el => {
+    const t = el.textContent.replace(/\s/g, '');
+    return /活期儲蓄|活儲/.test(t) && /\d\.\d{2,}/.test(t);
 })"""
 
 
@@ -252,17 +272,37 @@ def fetch_rendered(url):
             page = browser.new_page(locale="zh-TW")
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
             try:
-                page.wait_for_function(WAIT_JS, timeout=30000)
+                page.wait_for_function(WAIT_JS, timeout=20000)
             except Exception:       # noqa: BLE001  等不到就照樣取回，交給後面的檢查與診斷
-                print("      等候 30 秒仍未出現利率數字")
+                print("      等候 20 秒仍未出現活儲利率")
             return page.content()
         finally:
             browser.close()
 
 
+def read_bank(cfg):
+    """先用一般方式讀；讀不到完整資料就改用瀏覽器再試一次。回傳 (資料, 模式說明)。"""
+    if not cfg.get("render"):
+        try:
+            data = parse_rows(extract_rows(fetch(cfg["url"])), cfg)
+            validate(data)
+            return data, ""
+        except Exception as e:      # noqa: BLE001
+            print("      %s 一般方式讀不到（%s），改用瀏覽器" % (cfg["name"], e))
+    html = fetch_rendered(cfg["url"])
+    rows = extract_rows(html)
+    data = parse_rows(rows, cfg)
+    try:
+        validate(data)
+    except ValueError:
+        debug_rows(html, rows)
+        raise
+    return data, "  （瀏覽器模式）"
+
+
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 4")
+    print("抓取程式版本 6，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
@@ -275,21 +315,14 @@ def main(only=None):
             continue
         entry = {"id": cfg["id"], "name": cfg["name"], "source": cfg["url"]}
         try:
-            html = fetch_rendered(cfg["url"]) if cfg.get("render") else fetch(cfg["url"])
-            rows = extract_rows(html)
-            data = parse_rows(rows, cfg)
-            try:
-                validate(data)
-            except ValueError:
-                debug_rows(html, rows)
-                raise
+            data, mode = read_bank(cfg)
             old = previous.get(cfg["id"])
             jumps = big_jump(data, old) if old else []
             if jumps:
                 raise ValueError("與前次相差超過 1 個百分點，請人工確認：%s" % jumps)
             entry.update(data, status="ok", fetched=now.isoformat(timespec="seconds"))
-            print("OK    %s  活儲 %.3f  一年定存(固定) %.3f" % (
-                cfg["name"], data["demand_savings"], data["time"]["12"]["fixed"]))
+            print("OK    %s  活儲 %.3f  一年定存(固定) %.3f%s" % (
+                cfg["name"], data["demand_savings"], data["time"]["12"]["fixed"], mode))
         except Exception as e:      # noqa: BLE001
             failed.append(cfg["name"])
             print("FAIL  %s  %s" % (cfg["name"], e))
