@@ -83,14 +83,30 @@ def tenor_months(label):
 
 def extract_rows(html):
     """回傳頁面上所有「列」，每列是一串已正規化的儲存格文字。
-    以 <tr> 為主；沒有表格的頁面改讀 <li>。"""
-    soup = BeautifulSoup(html, "html.parser")
-    rows = [[norm(c.get_text()) for c in tr.find_all(["th", "td"])] for tr in soup.find_all("tr")]
+    以 <tr> 為主；沒有表格的頁面改讀 <li>。
+    用 lxml 解析：有些銀行的舊式頁面沒有寫 </tr> 結尾標籤，
+    lxml 會自動補上，不會把後面幾列誤併成同一列。"""
+    try:
+        soup = BeautifulSoup(html, "lxml")
+    except Exception:               # noqa: BLE001  沒裝 lxml 時退回內建解析器
+        soup = BeautifulSoup(html, "html.parser")
+    rows = []
+    for tr in soup.find_all("tr"):
+        cells = tr.find_all(["th", "td"], recursive=False)   # 只取這一列自己的儲存格
+        rows.append([norm(c.get_text()) for c in cells])
     rows = [r for r in rows if any(r)]
     if not rows:
         rows = [[norm(s) for s in li.stripped_strings] for li in soup.find_all("li")]
         rows = [r for r in rows if any(r)]
     return rows
+
+
+def debug_rows(rows):
+    """抓取失敗時，把可能相關的列印到紀錄裡，方便判斷頁面長什麼樣子。"""
+    print("      共讀到 %d 列" % len(rows))
+    hits = [r for r in rows if any("活期" in c or "活儲" in c for c in r)]
+    for r in (hits or rows)[:12]:
+        print("      | " + " | ".join(c[:30] for c in r[:8]))
 
 
 # ---------------------------------------------------------------- 解析
@@ -200,6 +216,7 @@ def fetch(url):
 
 def main(only=None):
     now = datetime.now(TPE)
+    print("抓取程式版本 2")
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
@@ -212,8 +229,13 @@ def main(only=None):
             continue
         entry = {"id": cfg["id"], "name": cfg["name"], "source": cfg["url"]}
         try:
-            data = parse_rows(extract_rows(fetch(cfg["url"])), cfg)
-            validate(data)
+            rows = extract_rows(fetch(cfg["url"]))
+            data = parse_rows(rows, cfg)
+            try:
+                validate(data)
+            except ValueError:
+                debug_rows(rows)
+                raise
             old = previous.get(cfg["id"])
             jumps = big_jump(data, old) if old else []
             if jumps:
