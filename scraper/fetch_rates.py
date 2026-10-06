@@ -81,19 +81,29 @@ def tenor_months(label):
     return None
 
 
+LOOSE_RATE = re.compile(r"(?<![\d.])\d{1,2}\.\d{2,5}(?![\d.])")
+
+
+def make_soup(html):
+    """用 lxml 解析：有些銀行的舊式頁面沒有寫 </tr> 結尾標籤，lxml 會自動補上。"""
+    try:
+        return BeautifulSoup(html, "lxml")
+    except Exception:               # noqa: BLE001  沒裝 lxml 時退回內建解析器
+        return BeautifulSoup(html, "html.parser")
+
+
 def extract_rows(html):
     """回傳頁面上所有「列」，每列是一串已正規化的儲存格文字。
-    以 <tr> 為主；沒有表格的頁面改讀 <li>。
-    用 lxml 解析：有些銀行的舊式頁面沒有寫 </tr> 結尾標籤，
-    lxml 會自動補上，不會把後面幾列誤併成同一列。"""
-    try:
-        soup = BeautifulSoup(html, "lxml")
-    except Exception:               # noqa: BLE001  沒裝 lxml 時退回內建解析器
-        soup = BeautifulSoup(html, "html.parser")
+    以 <tr> 為主；沒有表格的頁面改讀 <li>。"""
+    soup = make_soup(html)
     rows = []
     for tr in soup.find_all("tr"):
-        cells = tr.find_all(["th", "td"], recursive=False)   # 只取這一列自己的儲存格
-        rows.append([norm(c.get_text()) for c in cells])
+        # 取屬於這一列的儲存格：包含被 <font>、<span> 等標籤包住的，但不含巢狀表格裡的
+        cells = [norm(c.get_text()) for c in tr.find_all(["th", "td"]) if c.find_parent("tr") is tr]
+        # 有些頁面把利率數字寫在儲存格外面；儲存格裡找不到利率時，改從整列文字找
+        if cells and not any(RATE.match(c) for c in cells) and not tr.find("tr"):
+            cells += LOOSE_RATE.findall(tr.get_text(" "))
+        rows.append(cells)
     rows = [r for r in rows if any(r)]
     if not rows:
         rows = [[norm(s) for s in li.stripped_strings] for li in soup.find_all("li")]
@@ -101,12 +111,20 @@ def extract_rows(html):
     return rows
 
 
-def debug_rows(rows):
-    """抓取失敗時，把可能相關的列印到紀錄裡，方便判斷頁面長什麼樣子。"""
+def debug_rows(html, rows):
+    """抓取失敗時，把可能相關的內容印到紀錄裡，方便判斷頁面長什麼樣子。"""
     print("      共讀到 %d 列" % len(rows))
     hits = [r for r in rows if any("活期" in c or "活儲" in c for c in r)]
-    for r in (hits or rows)[:12]:
+    for r in (hits or rows)[:6]:
         print("      | " + " | ".join(c[:30] for c in r[:8]))
+    soup = make_soup(html)
+    for tr in soup.find_all("tr"):
+        if norm(tr.get_text()).startswith("活期儲蓄存款") and not tr.find("tr"):
+            print("      原始內容：" + re.sub(r"\s+", " ", str(tr))[:900])
+            nxt = tr.find_next_sibling()
+            if nxt is not None:
+                print("      下一個元素：" + re.sub(r"\s+", " ", str(nxt))[:400])
+            break
 
 
 # ---------------------------------------------------------------- 解析
@@ -216,7 +234,7 @@ def fetch(url):
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 2")
+    print("抓取程式版本 3")
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
@@ -229,12 +247,13 @@ def main(only=None):
             continue
         entry = {"id": cfg["id"], "name": cfg["name"], "source": cfg["url"]}
         try:
-            rows = extract_rows(fetch(cfg["url"]))
+            html = fetch(cfg["url"])
+            rows = extract_rows(html)
             data = parse_rows(rows, cfg)
             try:
                 validate(data)
             except ValueError:
-                debug_rows(rows)
+                debug_rows(html, rows)
                 raise
             old = previous.get(cfg["id"])
             jumps = big_jump(data, old) if old else []
