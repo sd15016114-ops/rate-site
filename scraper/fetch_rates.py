@@ -6,6 +6,7 @@
     python scraper/fetch_rates.py bot chb    # 只抓指定銀行（測試用）
 
 設計原則：
+- 利率由網頁程式動態填入的銀行（設定 render），改用無頭瀏覽器開啟後再讀。
 - 不依賴各家網頁的 CSS 結構，而是讀出所有表格列，用「列的文字」辨識
   （例如「定期存款」「一年」「活期儲蓄存款」），銀行小幅改版時較不容易壞。
 - 只取一般額度的利率，大額（含「萬」「以上」等字樣）一律略過。
@@ -40,7 +41,9 @@ BANKS = [
      "categories": {"儲蓄存款": "savings"},
      "demand_savings_labels": ["一般活儲"]},
     {"id": "chb", "name": "彰化銀行",
-     "url": "https://www.bankchb.com/frontend/G0210_020104_query.jsp"},
+     "url": "https://www.bankchb.com/frontend/G0210_020104_query.jsp",
+     # 彰銀的利率是網頁載入後才由程式填入，要用瀏覽器開啟才讀得到
+     "render": True},
     {"id": "fcb", "name": "第一銀行",
      "url": "https://ebank.firstbank.com.tw/BATcpibWeb/html/FQ1001.html"},
 ]
@@ -232,9 +235,34 @@ def fetch(url):
     raise last
 
 
+# 等到「活期儲蓄存款」那一列出現利率數字，才算頁面載入完成
+WAIT_JS = r"""() => [...document.querySelectorAll('tr')].some(tr => {
+    const t = tr.innerText.replace(/\s/g, '');
+    return t.startsWith('活期儲蓄存款') && /\d\.\d{2,}/.test(t);
+})"""
+
+
+def fetch_rendered(url):
+    """用無頭瀏覽器開啟頁面，等網頁上的程式把利率填好後再取回內容。
+    只有設定 render 的銀行會用到，所以沒安裝 playwright 也不影響其他銀行。"""
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        try:
+            page = browser.new_page(locale="zh-TW")
+            page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            try:
+                page.wait_for_function(WAIT_JS, timeout=30000)
+            except Exception:       # noqa: BLE001  等不到就照樣取回，交給後面的檢查與診斷
+                print("      等候 30 秒仍未出現利率數字")
+            return page.content()
+        finally:
+            browser.close()
+
+
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 3")
+    print("抓取程式版本 4")
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
@@ -247,7 +275,7 @@ def main(only=None):
             continue
         entry = {"id": cfg["id"], "name": cfg["name"], "source": cfg["url"]}
         try:
-            html = fetch(cfg["url"])
+            html = fetch_rendered(cfg["url"]) if cfg.get("render") else fetch(cfg["url"])
             rows = extract_rows(html)
             data = parse_rows(rows, cfg)
             try:
