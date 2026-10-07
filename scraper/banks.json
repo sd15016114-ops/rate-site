@@ -20,5 +20,7 @@
   {"id": "ubot", "name": "聯邦銀行", "url": "https://www.ubot.com.tw/rates/twd/deposit_rate", "render": true},
   {"id": "feib", "name": "遠東商銀", "url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N", "pages": [{"url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDDepositRate"}, {"url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N", "category": "time"}]},
   {"id": "entie", "name": "安泰銀行", "url": "https://www.entiebank.com.tw/entie/ntsRate_M", "render": true},
-  {"id": "line", "name": "LINE Bank", "url": "https://www.linebank.com.tw/board-rate/deposit-rate", "render": true}
+  {"id": "line", "name": "LINE Bank", "url": "https://www.linebank.com.tw/board-rate/deposit-rate", "render": true},
+  {"id": "dbs", "name": "星展（台灣）", "url": "https://www.dbs.com.tw/personal-zh/rates/interest-rates.page"},
+  {"id": "scb", "name": "渣打銀行", "url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx", "pages": [{"url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=1"}, {"url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=2", "category": "time"}, {"url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=3", "category": "savings"}]}
 ]
