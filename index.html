@@ -205,7 +205,7 @@ function range(p){ return (p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'; }
 /* 利率說明：分段計息的活動會把每一段都列出來，例如「10 萬內 12%，10–20 萬 2.1%」 */
 function terms(p){
   var prev = p.cap;
-  return range(p)+' '+pct(p.rate)+(p.tiers||[]).map(function(t){ var x='，'+prev+'–'+t.cap+' 萬 '+pct(t.rate); prev=t.cap; return x; }).join('');
+  return range(p)+' '+pct(p.rate)+(p.tiers||[]).map(function(t){ var x='，'+(t.cap>=99999?'超過 '+prev+' 萬':prev+'–'+t.cap+' 萬')+' '+pct(t.rate); prev=t.cap; return x; }).join('');
 }
 /* 活動期間內「金額 × 利率」的加總：依各段額度套用各段利率，超過最後一段的部分用牌告利率 rest */
 function weighted(p, amount, rest){

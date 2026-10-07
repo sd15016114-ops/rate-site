@@ -1,12 +1,169 @@
 [
-  {"bank":"hsbc","name":"One能戶新臺幣優利活存","type":"活存","rate":1.88,"cap":300,"months":3,"who":"new","cond":"活動期間新開立運籌理財One能戶數位帳戶；當日餘額須達75萬元才適用","end":"2026/12/31","checked":"2026/10/06","min":75,"url":"https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#one"},
-  {"bank":"hsbc","name":"One能戶新臺幣優利活存（200萬以上）","type":"活存","rate":2.18,"cap":300,"months":3,"who":"new","cond":"活動期間新開立運籌理財One能戶數位帳戶；當日餘額須達200萬元才適用","end":"2026/12/31","checked":"2026/10/06","min":200,"url":"https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#one"},
-  {"bank":"hsbc","name":"新臺幣優利定存（新資金）","type":"定存","rate":2.2,"cap":3000,"months":6,"who":"vip","cond":"限卓越理財客戶（往來資產達300萬元），限30天內自他行轉入的新資金，須臨櫃或電話辦理","end":"2026/12/31","checked":"2026/10/06","min":100,"url":"https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#NTDUTDA"},
-  {"bank":"next","name":"2026Q4將來存款專案B","type":"活存","rate":1.85,"cap":100,"months":3,"who":"task","cond":"","end":"2026/12/31","checked":"2026/10/07","min":5,"url":"https://www.nextbank.com.tw/announcement/45c1e31fa40000000285cadc56793797/event1274"},
-  {"bank":"cathay","name":"臺幣新戶特優（證券戶任務）","type":"活存","rate":3,"cap":10,"months":3,"who":"new","cond":"從未開戶或 2025 年底前已結清的新戶；需開立臺幣帳戶、設為台股交割戶並建立至少一個子帳戶，餘額滿 5 千元起息","end":"2026/12/31","checked":"2026/10/07","url":"https://www.cathaybk.com.tw/cathaybk/personal/campaigns/ebanking/secmission/"},
-  {"bank":"cathay","name":"臺幣舊戶特選（證券戶任務）","type":"活存","rate":1.5,"cap":30,"months":3,"who":"task","cond":"既有客戶首次設定台股交割戶並建立至少一個子帳戶，餘額滿 5 千元起息；結息日前刪除子帳戶會喪失優惠","end":"2026/12/31","checked":"2026/10/07","url":"https://www.cathaybk.com.tw/cathaybk/personal/campaigns/ebanking/secmission/"},
-  {"bank":"obank","name":"新戶新台幣優利活儲","type":"活存","rate":12,"cap":10,"tiers":[{"cap":20,"rate":2.1}],"months":1,"who":"new","cond":"首次開戶的新戶，優惠一個月，不得與其他台幣活儲方案併用","end":"2026/12/30","checked":"2026/10/07","url":"https://www.o-bank.com/web/Event/CM_108022801/index.html"},
-  {"bank":"obank","name":"新台幣階梯活儲","type":"活存","rate":2.1,"cap":50,"tiers":[{"cap":100,"rate":1.5}],"months":6,"who":"task","cond":"需自他行轉入 5 萬元以上，每戶限享一次、為期六個月","end":"2026/12/30","checked":"2026/10/07","url":"https://www.o-bank.com/web/Event/CM_108022801/index.html"},
-  {"bank":"obank","name":"新台幣 3 個月定存專案","type":"定存","rate":2.2,"cap":1000,"months":3,"who":"open","cond":"單筆 2 萬到 1,000 萬元","end":"2026/12/31","checked":"2026/10/07","min":2,"url":"https://www.o-bank.com/web/Event/CM_108022801/index.html"},
-  {"bank":"obank","name":"新台幣 6 個月定存專案","type":"定存","rate":2.4,"cap":1000,"months":6,"who":"open","cond":"單筆 2 萬到 1,000 萬元","end":"2026/12/31","checked":"2026/10/07","min":2,"url":"https://www.o-bank.com/web/Event/CM_108022801/index.html"}
+  {
+    "bank": "hsbc",
+    "name": "One能戶新臺幣優利活存",
+    "type": "活存",
+    "rate": 1.88,
+    "cap": 300,
+    "months": 3,
+    "who": "new",
+    "cond": "活動期間新開立運籌理財One能戶數位帳戶；當日餘額須達75萬元才適用",
+    "end": "2026/12/31",
+    "checked": "2026/10/06",
+    "min": 75,
+    "url": "https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#one"
+  },
+  {
+    "bank": "hsbc",
+    "name": "One能戶新臺幣優利活存（200萬以上）",
+    "type": "活存",
+    "rate": 2.18,
+    "cap": 300,
+    "months": 3,
+    "who": "new",
+    "cond": "活動期間新開立運籌理財One能戶數位帳戶；當日餘額須達200萬元才適用",
+    "end": "2026/12/31",
+    "checked": "2026/10/06",
+    "min": 200,
+    "url": "https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#one"
+  },
+  {
+    "bank": "hsbc",
+    "name": "新臺幣優利定存（新資金）",
+    "type": "定存",
+    "rate": 2.2,
+    "cap": 3000,
+    "months": 6,
+    "who": "vip",
+    "cond": "限卓越理財客戶（往來資產達300萬元），限30天內自他行轉入的新資金，須臨櫃或電話辦理",
+    "end": "2026/12/31",
+    "checked": "2026/10/06",
+    "min": 100,
+    "url": "https://www.hsbc.com.tw/accounts/time-deposit/offers/extra/#NTDUTDA"
+  },
+  {
+    "bank": "next",
+    "name": "2026Q4將來存款專案B",
+    "type": "活存",
+    "rate": 1.85,
+    "cap": 100,
+    "months": 3,
+    "who": "task",
+    "cond": "",
+    "end": "2026/12/31",
+    "checked": "2026/10/07",
+    "min": 5,
+    "url": "https://www.nextbank.com.tw/announcement/45c1e31fa40000000285cadc56793797/event1274"
+  },
+  {
+    "bank": "cathay",
+    "name": "臺幣新戶特優（證券戶任務）",
+    "type": "活存",
+    "rate": 3,
+    "cap": 10,
+    "months": 3,
+    "who": "new",
+    "cond": "從未開戶或 2025 年底前已結清的新戶；需開立臺幣帳戶、設為台股交割戶並建立至少一個子帳戶，餘額滿 5 千元起息",
+    "end": "2026/12/31",
+    "checked": "2026/10/07",
+    "url": "https://www.cathaybk.com.tw/cathaybk/personal/campaigns/ebanking/secmission/"
+  },
+  {
+    "bank": "cathay",
+    "name": "臺幣舊戶特選（證券戶任務）",
+    "type": "活存",
+    "rate": 1.5,
+    "cap": 30,
+    "months": 3,
+    "who": "task",
+    "cond": "既有客戶首次設定台股交割戶並建立至少一個子帳戶，餘額滿 5 千元起息；結息日前刪除子帳戶會喪失優惠",
+    "end": "2026/12/31",
+    "checked": "2026/10/07",
+    "url": "https://www.cathaybk.com.tw/cathaybk/personal/campaigns/ebanking/secmission/"
+  },
+  {
+    "bank": "obank",
+    "name": "新戶新台幣優利活儲",
+    "type": "活存",
+    "rate": 12,
+    "cap": 10,
+    "tiers": [
+      {
+        "cap": 20,
+        "rate": 2.1
+      }
+    ],
+    "months": 1,
+    "who": "new",
+    "cond": "首次開戶的新戶，優惠一個月，不得與其他台幣活儲方案併用",
+    "end": "2026/12/30",
+    "checked": "2026/10/07",
+    "url": "https://www.o-bank.com/web/Event/CM_108022801/index.html"
+  },
+  {
+    "bank": "obank",
+    "name": "新台幣階梯活儲",
+    "type": "活存",
+    "rate": 2.1,
+    "cap": 50,
+    "tiers": [
+      {
+        "cap": 100,
+        "rate": 1.5
+      }
+    ],
+    "months": 6,
+    "who": "task",
+    "cond": "需自他行轉入 5 萬元以上，每戶限享一次、為期六個月",
+    "end": "2026/12/30",
+    "checked": "2026/10/07",
+    "url": "https://www.o-bank.com/web/Event/CM_108022801/index.html"
+  },
+  {
+    "bank": "obank",
+    "name": "新台幣 3 個月定存專案",
+    "type": "定存",
+    "rate": 2.2,
+    "cap": 1000,
+    "months": 3,
+    "who": "open",
+    "cond": "單筆 2 萬到 1,000 萬元",
+    "end": "2026/12/31",
+    "checked": "2026/10/07",
+    "min": 2,
+    "url": "https://www.o-bank.com/web/Event/CM_108022801/index.html"
+  },
+  {
+    "bank": "obank",
+    "name": "新台幣 6 個月定存專案",
+    "type": "定存",
+    "rate": 2.4,
+    "cap": 1000,
+    "months": 6,
+    "who": "open",
+    "cond": "單筆 2 萬到 1,000 萬元",
+    "end": "2026/12/31",
+    "checked": "2026/10/07",
+    "min": 2,
+    "url": "https://www.o-bank.com/web/Event/CM_108022801/index.html"
+  },
+  {
+    "bank": "next",
+    "name": "2026Q4將來存款專案A",
+    "type": "活存",
+    "rate": 0.875,
+    "cap": 50,
+    "tiers": [
+      {
+        "cap": 99999,
+        "rate": 1.435
+      }
+    ],
+    "months": 3,
+    "who": "open",
+    "cond": "活儲帳戶自動適用，免任務；新開戶次日起適用",
+    "end": "2026/12/31",
+    "checked": "2026/10/07",
+    "url": "https://www.nextbank.com.tw/announcement/45c1e31fa40000000285cadc56793797/event1273"
+  }
 ]
