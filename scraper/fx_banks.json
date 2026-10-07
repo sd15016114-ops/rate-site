@@ -1,0 +1,7 @@
+[
+  {"id": "bot",    "name": "臺灣銀行",   "url": "https://rate.bot.com.tw/ir?Lang=zh-TW"},
+  {"id": "land",   "name": "土地銀行",   "url": "https://rate.landbank.com.tw/zh-TW/Foreign/ForeignCurrencyDRate?mid=38"},
+  {"id": "mega",   "name": "兆豐銀行",   "url": "https://www.megabank.com.tw/personal/savings/deposit-service/rate/foreign-rate", "render": true},
+  {"id": "cathay", "name": "國泰世華",   "url": "https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/rate/"},
+  {"id": "esun",   "name": "玉山銀行",   "url": "https://www.esunbank.com/zh-tw/personal/deposit/rate/foreign/deposit-rate"}
+]

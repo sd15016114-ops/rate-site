@@ -44,7 +44,11 @@ nav.jump a:hover{background:var(--green-soft);color:var(--green)}
 .intro p{margin:0;color:var(--muted);max-width:40em}
 .updated{font-size:13px;color:var(--muted);margin-top:6px}
 
-.mine{background:var(--sheet);border:1px solid var(--rule);border-left:6px double var(--green);padding:14px 18px;margin:22px 0 0}
+.modes{display:inline-flex;margin:22px 0 0;border:1px solid var(--green);border-radius:999px;overflow:hidden;background:var(--sheet)}
+.modes button{font:inherit;font-size:15px;font-weight:500;color:var(--green);background:transparent;border:0;padding:7px 20px;cursor:pointer}
+.modes button+button{border-left:1px solid var(--green)}
+.modes button[aria-pressed=true]{background:var(--green);color:var(--sheet);font-weight:700}
+.mine{background:var(--sheet);border:1px solid var(--rule);border-left:6px double var(--green);padding:14px 18px;margin:12px 0 0}
 .mine .amount{font-size:17px;font-weight:500;margin:0}
 .mine input[type=number],.mine select{font:inherit;color:var(--green);font-weight:700;background:transparent;border:0;border-bottom:2px solid var(--green);border-radius:0;padding:0 4px;text-align:center}
 .mine input[type=number]{width:3.4em;-moz-appearance:textfield}
@@ -134,16 +138,16 @@ footer p{margin:0 0 6px;max-width:50em}
     <h1>銀行利率大全</h1>
     <p id="introText">比較各家銀行的活存、定存牌告利率與限時活動，填入金額就知道實際能拿多少利息。</p>
     <div class="updated" id="updated">資料載入中…</div>
+    <div class="modes" role="group" aria-label="幣別">
+      <button type="button" data-mode="TWD" aria-pressed="true">臺幣</button><button type="button" data-mode="USD" aria-pressed="false">美元</button><button type="button" data-mode="JPY" aria-pressed="false">日圓</button>
+    </div>
     <div class="mine">
       <p class="amount">
         <label for="amt">存</label>
-        <input id="amt" type="number" inputmode="decimal" min="1" max="9999" step="1" value="30" aria-label="存款金額（萬元）"> 萬元，放
-        <select id="mon" aria-label="存放期間">
-          <option value="1">1 個月</option><option value="3">3 個月</option><option value="6">6 個月</option>
-          <option value="12" selected>1 年</option><option value="24">2 年</option><option value="36">3 年</option>
-        </select>
+        <input id="amt" type="number" inputmode="decimal" min="1" max="9999" step="1" value="30" aria-label="存款金額"> <span id="unit">萬元</span>，放
+        <select id="mon" aria-label="存放期間"></select>
       </p>
-      <div class="include">
+      <div class="include" id="include">
         <span>我可以申辦：</span>
         <label><input type="checkbox" id="fNew" checked> 新戶限定方案</label>
         <label><input type="checkbox" id="fTask" checked> 需完成任務的方案</label>
@@ -168,14 +172,14 @@ footer p{margin:0 0 6px;max-width:50em}
         <option value="公股">公股銀行</option><option value="民營">民營銀行</option><option value="純網銀">純網銀</option>
       </select>
       <select id="sort" aria-label="排序方式">
-        <option value="earn">利息由高到低</option><option value="demand">活儲利率由高到低</option>
+        <option value="earn">利息由高到低</option><option value="demand">活存利率由高到低</option>
         <option value="fixed">定存利率由高到低</option><option value="name">依名稱排序</option>
       </select>
       <input type="search" id="bankSearch" placeholder="搜尋銀行名稱，例如：玉山" aria-label="搜尋銀行名稱">
     </div>
     <div class="banks" id="bankList"></div>
     <p class="fine" id="bankNote"></p>
-    <p class="fine">利息為稅前估算。活動方案超過額度上限或優惠期結束後，改用該銀行牌告利率計算；牌告定存以固定利率、到期一次領回估算；一年以上採用定期儲蓄存款利率。</p>
+    <p class="fine" id="calcNote">利息為稅前估算。活動方案超過額度上限或優惠期結束後，改用該銀行牌告利率計算；牌告定存以固定利率、到期一次領回估算；一年以上採用定期儲蓄存款利率。</p>
   </section>
 
   <section class="block" id="faq">
@@ -197,7 +201,15 @@ footer p{margin:0 0 6px;max-width:50em}
 
 <script>
 /* ===== 資料：讀取每日抓取的 data/rates.json 與人工維護的 data/promos.json ===== */
-var TENORS = [1,3,6,12,24,36];
+var MODES = {
+  TWD:{unit:'萬元',   mult:10000, def:30,    max:9999,     width:'3.4em', cur:'元',   dec:0, tenors:[1,3,6,12,24,36], dem:'活期儲蓄', demPlan:'牌告活期儲蓄',
+       note:'利息為稅前估算。活動方案超過額度上限或優惠期結束後，改用該銀行牌告利率計算；牌告定存以固定利率、到期一次領回估算；一年以上採用定期儲蓄存款利率。'},
+  USD:{unit:'美元',   mult:1,     def:10000, max:99999999, width:'5.6em', cur:'美元', dec:2, tenors:[1,3,6,9,12],     dem:'活期存款', demPlan:'牌告美元活存'},
+  JPY:{unit:'萬日圓', mult:10000, def:100,   max:999999,   width:'4.4em', cur:'日圓', dec:0, tenors:[1,3,6,9,12],     dem:'活期存款', demPlan:'牌告日圓活存'}
+};
+MODES.USD.note = MODES.JPY.note = '利息以外幣計、為稅前估算，不含換匯的匯差與手續費，也沒有計入匯率漲跌。牌告定存以固定利率、到期一次領回估算；外幣目前只收錄牌告利率，不含活動。';
+var MODE = 'TWD', M = MODES.TWD, DATA = {TWD:[], USD:[], JPY:[]}, UPDATED = {}, ALLPROMOS = [], SAVED = {};
+var TENORS = M.tenors;
 var BANKS = [], PROMOS = [];
 var WHO = {open:'不限', new:'新戶限定', task:'需完成任務', pay:'薪轉戶', vip:'理財貴賓'};
 /* 額度說明：有最低金額時寫成「75 萬以上、300 萬內」 */
@@ -221,7 +233,7 @@ var PUBLIC = ['bot','land','tcb','fcb','hncb','chb','mega','tbb'], ONLINE = ['ne
 function bank(id){ for(var i=0;i<BANKS.length;i++) if(BANKS[i].id===id) return BANKS[i]; }
 function pct(n){ return n==null ? '—' : n.toFixed(3).replace(/0$/,'') + '%'; }
 function num(n){ return n==null ? '—' : n.toFixed(3); }
-function money(n){ return Math.round(n).toLocaleString('zh-TW'); }
+function money(n){ return n.toLocaleString('zh-TW',{minimumFractionDigits:M.dec, maximumFractionDigits:M.dec}); }
 function span(m){ return m>=12 && m%12===0 ? (m/12)+' 年' : m+' 個月'; }
 function $(id){ return document.getElementById(id); }
 function kind(b){ return PUBLIC.indexOf(b.id)>=0 ? '公股' : ONLINE.indexOf(b.id)>=0 ? '純網銀' : '民營'; }
@@ -239,6 +251,13 @@ function toBank(r){
       var k = String(t), a = t>=12 && sav[k] ? sav[k] : time[k];
       return a ? a.fixed : null;
     })};
+}
+/* 外幣：fx_rates.json 的一家銀行、指定幣別 */
+function toFxBank(r, cur){
+  var c = (r.rates||{})[cur];
+  if(!c) return null;
+  return {id:r.id, name:r.name, source:r.source, status:r.status, fetched:r.fetched, demand:c.demand,
+    fixed: MODES[cur].tenors.map(function(t){ var v = (c.time||{})[String(t)]; return v==null ? null : v; })};
 }
 function getJSON(url){
   return fetch(url,{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); });
@@ -259,7 +278,7 @@ function options(amount, months, allow){
   BANKS.forEach(function(b){
     if(b.fixed[ti]!=null) list.push({id:b.id, bank:b.name, plan:'牌告定存 '+span(months)+'期', promo:false, rate:b.fixed[ti],
       interest: amount*b.fixed[ti]/100*y, tags:['不需條件']});
-    if(b.demand!=null) list.push({id:b.id, bank:b.name, plan:'牌告活期儲蓄', promo:false, rate:b.demand,
+    if(b.demand!=null) list.push({id:b.id, bank:b.name, plan:M.demPlan, promo:false, rate:b.demand,
       interest: amount*b.demand/100*y, tags:['隨時可提領']});
   });
   PROMOS.forEach(function(p){
@@ -283,22 +302,23 @@ function options(amount, months, allow){
 }
 function state(){
   var wan = parseFloat($('amt').value);
-  return {wan:wan, ok:wan>0, amount:wan*10000, months:parseInt($('mon').value,10),
+  return {wan:wan, ok:wan>0, amount:wan*M.mult, months:parseInt($('mon').value,10),
     allow:{open:true, new:$('fNew').checked, task:$('fTask').checked, pay:$('fPay').checked, vip:$('fVip').checked}};
 }
 
 /* ===== 精選方案：利息最高的 4 家 ===== */
 function renderPicks(st, list){
-  if(!st.ok){ $('picksLead').textContent='請先在上方填入存款金額（萬元）。'; $('pickGrid').innerHTML=''; return; }
+  if(!BANKS.length){ $('picksLead').textContent = MODE==='TWD' ? '' : '外幣利率資料還沒有產生，請等下一次每日更新。'; $('pickGrid').innerHTML=''; return; }
+  if(!st.ok){ $('picksLead').textContent='請先在上方填入存款金額。'; $('pickGrid').innerHTML=''; return; }
   var seen = {}, top = [];
   list.forEach(function(o){ if(top.length<4 && !seen[o.id]){ seen[o.id]=1; top.push(o); } });
-  $('picksLead').textContent = '存 '+st.wan+' 萬元、放 '+span(st.months)+'，實際利息最高的 '+top.length+' 家銀行。';
+  $('picksLead').textContent = '存 '+st.wan.toLocaleString('zh-TW')+' '+M.unit+'、放 '+span(st.months)+'，實際利息最高的 '+top.length+' 家銀行。';
   $('pickGrid').innerHTML = top.map(function(o){
     return '<article class="pick"><div class="bank">'+esc(o.bank)+(o.promo?' <span class="seal">活動</span>':'')+'</div>'
       + '<div class="plan">'+esc(o.plan)+'</div>'
       + '<div class="big">'+pct(o.rate)+'<small>年利率</small></div>'
       + '<div class="tags">'+o.tags.map(function(t){ return '<span class="tag">'+esc(t)+'</span>'; }).join('')+'</div>'
-      + '<div class="earn">你的利息約 <b>'+money(o.interest)+' 元</b></div></article>';
+      + '<div class="earn">你的利息約 <b>'+money(o.interest)+' '+M.cur+'</b></div></article>';
   }).join('');
 }
 
@@ -325,14 +345,14 @@ function renderBanks(st, list){
     var promos = PROMOS.filter(function(p){ return p.bank===b.id; }), top = best[b.id];
     return '<details><summary>'
       + '<div class="bname">'+esc(b.name)+(b.status!=='ok'?'<span class="stale">今日未更新</span>':'')+'<small>'+kind(b)+'</small></div>'
-      + '<div class="fig dem">活期儲蓄<b>'+pct(b.demand)+'</b></div>'
+      + '<div class="fig dem">'+M.dem+'<b>'+pct(b.demand)+'</b></div>'
       + '<div class="fig">定存 '+span(st.months)+'<b>'+pct(b.fixed[ti])+'</b></div>'
-      + '<div class="fig earn">'+(top?'最多可拿<b>'+money(top.interest)+' 元</b>':'<b>&nbsp;</b>')+'</div>'
+      + '<div class="fig earn">'+(top?'最多可拿<b>'+money(top.interest)+' '+M.cur+'</b>':'<b>&nbsp;</b>')+'</div>'
       + '<span class="chev" aria-hidden="true">›</span>'
       + promos.map(function(p){ return '<div class="gift">🎁 '+esc(p.name)+'：'+terms(p)+(p.who!=='open'?'（'+WHO[p.who]+'）':'')+'</div>'; }).join('')
       + '</summary><div class="more-info">'
       + (top?'<p>以你的條件，最划算的是「'+esc(top.plan)+'」。</p>':'')
-      + '<h3>牌告利率（年息 %，固定利率）</h3><div class="scroll"><table><tr><th>活期儲蓄</th>'
+      + '<h3>牌告利率（年息 %，固定利率）</h3><div class="scroll"><table><tr><th>'+M.dem+'</th>'
       + TENORS.map(function(t){ return '<th>'+span(t)+'</th>'; }).join('') + '</tr><tr><td>'+num(b.demand)+'</td>'
       + b.fixed.map(function(x){ return '<td>'+num(x)+'</td>'; }).join('') + '</tr></table></div>'
       + (promos.length ? '<h3>活動優惠</h3><ul>'+promos.map(function(p){
@@ -352,24 +372,53 @@ function render(){
 }
 ['amt','mon','fNew','fTask','fPay','fVip','need','sort','bankSearch'].forEach(function(id){ $(id).addEventListener('input',render); });
 
-/* 記住上次填的金額與期間（只存在這台裝置） */
+/* 記住上次看的幣別，以及各幣別填的金額與期間（只存在這台裝置） */
 try{
-  var saved = JSON.parse(localStorage.getItem('rate-site')||'{}');
-  if(saved.amt) $('amt').value = saved.amt;
-  if(saved.mon) $('mon').value = saved.mon;
-}catch(e){}
-['amt','mon'].forEach(function(id){ $(id).addEventListener('input',function(){
-  try{ localStorage.setItem('rate-site', JSON.stringify({amt:$('amt').value, mon:$('mon').value})); }catch(e){}
-}); });
+  SAVED = JSON.parse(localStorage.getItem('rate-site')||'{}');
+  if(SAVED.amt && !SAVED.TWD) SAVED.TWD = {amt:SAVED.amt, mon:SAVED.mon};
+}catch(e){ SAVED = {}; }
+function remember(){
+  SAVED[MODE] = {amt:$('amt').value, mon:$('mon').value}; SAVED.mode = MODE;
+  try{ localStorage.setItem('rate-site', JSON.stringify({mode:SAVED.mode, TWD:SAVED.TWD, USD:SAVED.USD, JPY:SAVED.JPY})); }catch(e){}
+}
+['amt','mon'].forEach(function(id){ $(id).addEventListener('input',remember); });
+
+function setMode(m){
+  MODE = MODES[m] ? m : 'TWD'; M = MODES[MODE];
+  TENORS = M.tenors; BANKS = DATA[MODE]; PROMOS = MODE==='TWD' ? ALLPROMOS : [];
+  var mine = SAVED[MODE]||{}, mon = parseInt(mine.mon,10);
+  $('mon').innerHTML = TENORS.map(function(t){ return '<option value="'+t+'">'+span(t)+'</option>'; }).join('');
+  $('mon').value = TENORS.indexOf(mon)>=0 ? mon : 12;
+  $('amt').value = mine.amt>0 ? mine.amt : M.def;
+  $('amt').max = M.max; $('amt').style.width = M.width;
+  $('unit').textContent = M.unit;
+  $('include').hidden = MODE!=='TWD';
+  $('include').style.display = MODE==='TWD' ? '' : 'none';
+  $('calcNote').textContent = M.note;
+  document.querySelectorAll('.modes button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.mode===MODE ? 'true' : 'false'); });
+  $('updated').textContent = UPDATED[MODE] ? '每天早上自動更新，最近更新 '+day(UPDATED[MODE]) : '';
+  $('introText').textContent = MODE==='TWD'
+    ? '比較 '+BANKS.length+' 家銀行的活存、定存牌告利率與限時活動，填入金額就知道實際能拿多少利息。'
+    : '比較 '+BANKS.length+' 家銀行的'+M.cur+'活存、定存牌告利率，直接填入'+M.cur+'金額就知道能拿多少利息。';
+  render();
+}
+document.querySelectorAll('.modes button').forEach(function(b){
+  b.addEventListener('click',function(){ setMode(b.dataset.mode); remember(); });
+});
 
 var today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
-Promise.all([load('rates.json'), load('promos.json').catch(function(){ return []; })]).then(function(res){
-  BANKS = (res[0].banks||[]).filter(function(r){ return r.status!=='failed'; }).map(toBank);
+Promise.all([load('rates.json'), load('promos.json').catch(function(){ return []; }), load('fx_rates.json').catch(function(){ return null; })]).then(function(res){
+  DATA.TWD = (res[0].banks||[]).filter(function(r){ return r.status!=='failed'; }).map(toBank);
+  UPDATED.TWD = res[0].updated;
+  if(res[2]) ['USD','JPY'].forEach(function(cur){
+    DATA[cur] = (res[2].banks||[]).filter(function(r){ return r.status!=='failed'; })
+      .map(function(r){ return toFxBank(r,cur); }).filter(Boolean);
+    UPDATED[cur] = res[2].updated;
+  });
+  BANKS = DATA.TWD;
   /* 已過截止日的活動自動不顯示 */
-  PROMOS = (Array.isArray(res[1])?res[1]:[]).filter(function(p){ return bank(p.bank) && (!p.end || p.end>=today); });
-  $('updated').textContent = '每天早上自動更新，最近更新 '+day(res[0].updated);
-  $('introText').textContent = '比較 '+BANKS.length+' 家銀行的活存、定存牌告利率與限時活動，填入金額就知道實際能拿多少利息。';
-  render();
+  ALLPROMOS = (Array.isArray(res[1])?res[1]:[]).filter(function(p){ return bank(p.bank) && (!p.end || p.end>=today); });
+  setMode(SAVED.mode||'TWD');
 }).catch(function(){
   $('updated').textContent = '資料載入失敗';
   $('picksLead').textContent = '讀不到利率資料，請稍後重新整理。';
