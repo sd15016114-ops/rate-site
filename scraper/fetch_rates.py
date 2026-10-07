@@ -27,13 +27,20 @@ OUT = Path(__file__).resolve().parent.parent / "data" / "rates.json"
 TPE = timezone(timedelta(hours=8))
 HEADERS = {"User-Agent": "RateSiteBot/0.1 (daily deposit-rate check; contact: YOUR_EMAIL)"}
 TENORS = (1, 3, 6, 9, 12, 24, 36)          # 要保留的存期（月）
-REQUIRED_TIME = (1, 3, 6, 12)              # 定期存款至少要抓到這些存期才算成功
-SKIP_WORDS = ("證券", "証券", "薪資", "薪轉", "數位", "親子", "學生")   # 特殊帳戶，不是一般牌告
-NOT_LARGE = ("未達", "以下", "以內", "未滿")                              # 「未達三百萬」是一般額度
+REQUIRED_TIME = (1, 3, 6)                  # 定期存款至少要抓到這些存期；另外一年期要有定存或定儲其中之一
+SKIP_WORDS = ("證券", "証券", "薪資", "薪轉", "數位", "親子", "學生",   # 特殊帳戶，不是一般牌告
+              "公教", "公益", "優惠", "專案", "優存", "新戶", "外資", "同業")
+SPECIAL_PREFIX = re.compile(r"^\((?!一般\))[^()]*\)")                 # 「(優存)1個月定存」這類開頭的特殊方案
+NOT_LARGE = ("未達", "以下", "以內", "未滿", "起息", "限額")                              # 「未達三百萬」是一般額度
 
 # ---------------------------------------------------------------- 銀行設定
 # 銀行清單放在 scraper/banks.json，新增銀行只要在那裡加一筆 id、name、url。
-# 可選欄位：render（true 表示一律用瀏覽器開）、categories、demand_savings_labels。
+# 可選欄位：
+#   render   true 表示一律用瀏覽器開
+#   pages    利率分散在好幾頁時列出每一頁：[{"url": ..., "category": "time"}]，
+#            category 用在整頁只有一張表、表上又沒寫類別的情況（time 定存／savings 定儲）
+#   select   要先選下拉選單才會顯示的頁面：{"selector": "select#type", "values": ["1", "3"]}
+#   categories、demand_savings_labels、demand_labels   該銀行特有的名稱
 BANKS = json.loads((Path(__file__).resolve().parent / "banks.json").read_text(encoding="utf-8"))
 
 # ---------------------------------------------------------------- 文字處理
@@ -105,6 +112,9 @@ HEADING_NOISE = ("資料", "生效", "查詢時間", "單位", "年息", "年利
 HAS_CJK = re.compile(r"[\u4e00-\u9fff]")
 
 
+SAME = "〃"      # 表格緊接在另一張表後面、中間沒有標題：沿用上一張表的類別
+
+
 def table_heading(table):
     """找出表格上方最近的一段標題文字（例如「定存」「300萬元以下定期存款利率」）。"""
     cap = table.find("caption")
@@ -115,14 +125,19 @@ def table_heading(table):
         t = norm(text)
         if not t or not HAS_CJK.search(t) or any(w in t for w in HEADING_NOISE):
             continue
-        return t if len(t) <= 30 else ""
+        if len(t) > 30:
+            return ""
+        # 最近的文字其實是前一張表的儲存格內容，而且看不出類別 → 視為同一組表格
+        if text.find_parent(["td", "th"]) is not None and heading_category(t) is None:
+            return SAME
+        return t
     return ""
 
 
 def heading_category(h):
     """有些銀行每種存款各一張表，類別寫在表格上方的標題，而不是表格裡。"""
     if is_large(h) or any(w in h for w in ("優利", "可轉讓", "存單", "郵政", "專案", "外幣", "放款",
-                                             "分期", "零存", "存本", "試算")):
+                                             "分期", "零存", "存本", "試算", "同業", "機構")):
         return None
     h = h.replace("性", "")                    # 「定期性存款利率」視同「定期存款利率」
     if "定期儲蓄" in h or "定儲" in h:
@@ -215,16 +230,36 @@ def debug_rows(html, rows):
 
 
 # ---------------------------------------------------------------- 解析
+SHORT_CATEGORIES = {"定存": "time", "定儲": "savings"}
+
+
+def split_category(lab, categories):
+    """處理類別和存期寫在同一格的標籤，例如「定期存款一個月」「1年定存」。
+    回傳 (類別, 月數)，不是這種寫法就回傳 (None, None)。"""
+    names = dict(SHORT_CATEGORIES, **categories)
+    for name in sorted(names, key=len, reverse=True):
+        if lab.startswith(name) and len(lab) > len(name):
+            t = tenor_months(lab[len(name):])
+            if t:
+                return names[name], t
+        if lab.endswith(name) and len(lab) > len(name):
+            t = tenor_months(lab[:-len(name)])
+            if t:
+                return names[name], t
+    return None, None
+
+
 def parse_rows(rows, cfg=None):
     cfg = cfg or {}
     categories = {"定期存款": "time", "定期儲蓄存款": "savings"}
     categories.update(cfg.get("categories", {}))
-    ds_labels = ["活期儲蓄存款", "活期儲蓄", "活儲存款", "活儲"] + cfg.get("demand_savings_labels", [])
-    d_labels = ["活期存款", "活存"] + cfg.get("demand_labels", [])
+    ds_labels = ["活期儲蓄存款", "活期儲蓄", "活儲存款", "活儲", "活儲息"] + cfg.get("demand_savings_labels", [])
+    d_labels = ["活期存款", "活存", "活存息"] + cfg.get("demand_labels", [])
 
     fixed_first = True          # 預設欄位順序：固定、機動
-    kind = None                 # 整張表只有固定或只有機動利率時（寫在表格標題上）
+    kind = None                 # 整張表只有固定或只有機動利率時（寫在表格標題或表頭上）
     category = None
+    last_tenor = None           # 固定、機動分成上下兩列時，第二列沒有存期，沿用上一列的
     out = {"demand": None, "demand_savings": None, "time": {}, "savings": {}}
 
     for cells in rows:
@@ -233,32 +268,58 @@ def parse_rows(rows, cfg=None):
         # 0) 新的一張表：用表格上方的標題決定類別
         if cells[0] == "§":
             h = cells[1] if len(cells) > 1 else ""
-            category = heading_category(h)
+            if h != SAME:
+                category = heading_category(h)
             kind = "fixed" if "固定" in h and "機動" not in h else "floating" if "機動" in h and "固定" not in h else None
+            last_tenor = None
             continue
 
         labels = [clean_label(c) for c in cells]
         nums = [float(c.rstrip("%")) for c in cells if RATE.match(c)]
 
-        # 1) 表頭列：判斷固定／機動哪一欄在前（每張表各自判斷）
+        # 1) 表頭列：判斷固定／機動哪一欄在前（每張表各自判斷）；只有其中一種時整張表都算那一種
         if not nums and any("固定" in c or "機動" in c for c in cells):
             fi = next((i for i, c in enumerate(cells) if "固定" in c), None)
             mi = next((i for i, c in enumerate(cells) if "機動" in c), None)
             if fi is not None and mi is not None and fi != mi:
                 fixed_first = fi < mi
+                kind = None
+            elif fi is not None and mi is None:
+                kind = "fixed"
+            elif mi is not None and fi is None:
+                kind = "floating"
             continue
 
         # 2) 類別（定期存款／定期儲蓄存款）；有 rowspan 的表格只在第一列出現，所以要記住
         for raw, lab in zip(cells, labels):
             if lab in categories:
                 category = None if is_large(raw) else categories[lab]
+                last_tenor = None
                 break
 
-        # 3) 大額、薪轉、證券戶等一律略過
-        if any(is_large(c) for c in cells) or any(w in lab for lab in labels for w in SKIP_WORDS):
+        # 3) 大額、薪轉、證券戶、特殊方案等一律略過
+        if any(is_large(c) for c in cells):
+            if any(is_large(c) and re.search("定期|定存|定儲", c) for c in cells):
+                category = None             # 「大額定期存款」是另一個類別，後面幾列都不要
+            continue
+        if any(w in lab for lab in labels for w in SKIP_WORDS) or any(SPECIAL_PREFIX.match(c) for c in cells):
             continue
 
-        tenor = next((t for t in (tenor_months(c) for c in labels) if t), None)
+        tenor = None
+        for lab in labels:                  # 類別和存期寫在同一格（「定期存款一個月」「1年定存」）
+            cat, t = split_category(lab, categories)
+            if cat:
+                category, tenor = cat, t
+                break
+        if tenor is None:
+            tenor = next((t for t in (tenor_months(c) for c in labels) if t), None)
+
+        # 固定、機動寫在各自的列上（儲存格內容就是「固定」或「機動」）
+        row_kind = "fixed" if "固定" in cells else "floating" if "機動" in cells else None
+        if tenor is not None:
+            last_tenor = tenor
+        elif row_kind and category and nums:
+            tenor = last_tenor
 
         # 4) 活期利率
         if tenor is None and nums:
@@ -273,8 +334,9 @@ def parse_rows(rows, cfg=None):
         if tenor is not None and category and nums:
             key = str(tenor)
             if tenor in TENORS:
-                if kind:                                  # 固定、機動分成兩張表：各填各的
-                    out[category].setdefault(key, {}).setdefault(kind, nums[0])
+                k = row_kind or kind
+                if k:                                     # 固定、機動分開寫：各填各的
+                    out[category].setdefault(key, {}).setdefault(k, nums[0])
                 elif key not in out[category]:
                     a, b = (nums[0], nums[1]) if len(nums) >= 2 else (nums[0], nums[0])
                     fixed, floating = (a, b) if fixed_first else (b, a)
@@ -283,7 +345,7 @@ def parse_rows(rows, cfg=None):
 
         # 6) 第一格是不認得的項目名稱 → 離開目前類別，避免把別的表誤認成定存
         first = labels[0] if labels else ""
-        if first and first not in categories and tenor is None:
+        if nums and first and first not in categories and tenor is None:
             category = None
 
     # 只抓到固定或機動其中一種時，另一種用同一個數字補上
@@ -294,6 +356,11 @@ def parse_rows(rows, cfg=None):
     return out
 
 
+def one_year(d):
+    """一年期利率：個人戶優先看定期儲蓄存款，沒有才看定期存款。"""
+    return (d["savings"].get("12") or d["time"].get("12") or {}).get("fixed")
+
+
 def validate(d):
     """資料不完整或數值不合理就丟出例外。"""
     if d["demand_savings"] is None:
@@ -301,6 +368,8 @@ def validate(d):
     missing = [t for t in REQUIRED_TIME if str(t) not in d["time"]]
     if missing:
         raise ValueError("定期存款缺少存期（月）：%s" % missing)
+    if one_year(d) is None:
+        raise ValueError("找不到一年期的定存或定儲利率")
     values = [d["demand_savings"]] + ([d["demand"]] if d["demand"] is not None else [])
     for group in (d["time"], d["savings"]):
         for r in group.values():
@@ -343,51 +412,88 @@ WAIT_JS = r"""() => [...document.querySelectorAll('tr, li')].some(el => {
 })"""
 
 
-def fetch_rendered(url):
-    """用無頭瀏覽器開啟頁面，等網頁上的程式把利率填好後再取回內容。
-    只有設定 render 的銀行會用到，所以沒安裝 playwright 也不影響其他銀行。"""
+# 不特別等活儲那一列，只要頁面上出現任何利率數字就算載入完成（給只有定存的分頁用）
+WAIT_ANY_JS = r"""() => [...document.querySelectorAll('tr, li')].some(el => /\d\.\d{2,}/.test(el.textContent))"""
+
+
+def fetch_rendered(url, select=None, wait_any=False):
+    """用無頭瀏覽器開啟頁面，等網頁上的程式把利率填好後再取回內容，回傳一串 HTML。
+    select 有設定時，會依序選下拉選單的每個選項，各取回一份。
+    只有需要的銀行會用到，所以沒安裝 playwright 也不影響其他銀行。"""
     from playwright.sync_api import sync_playwright
+    wait_js = WAIT_ANY_JS if (wait_any or select) else WAIT_JS
     with sync_playwright() as p:
         browser = p.chromium.launch()
         try:
             page = browser.new_page(locale="zh-TW")
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
-            try:                    # 有些頁面分好幾次載入資料，先等網路連線都安靜下來
-                page.wait_for_load_state("networkidle", timeout=15000)
-            except Exception:       # noqa: BLE001
-                pass
-            try:
-                page.wait_for_function(WAIT_JS, timeout=20000)
-            except Exception:       # noqa: BLE001  等不到就照樣取回，交給後面的檢查與診斷
-                print("      等候 20 秒仍未出現活儲利率")
-            return page.content()
+
+            def settle():
+                try:                # 有些頁面分好幾次載入資料，先等網路連線都安靜下來
+                    page.wait_for_load_state("networkidle", timeout=15000)
+                except Exception:   # noqa: BLE001
+                    pass
+                try:
+                    page.wait_for_function(wait_js, timeout=20000)
+                except Exception:   # noqa: BLE001  等不到就照樣取回，交給後面的檢查與診斷
+                    print("      等候 20 秒仍未出現利率數字")
+
+            settle()
+            if not select:
+                return [page.content()]
+            pages = []
+            for value in select["values"]:
+                page.select_option(select["selector"], value)
+                page.wait_for_timeout(4000)
+                settle()
+                pages.append(page.content())
+            return pages
         finally:
             browser.close()
 
 
+FORCED_HEADING = {"time": "定期存款", "savings": "定期儲蓄存款"}
+
+
+def page_rows(html, page_cfg):
+    rows = extract_rows(html)
+    forced = FORCED_HEADING.get(page_cfg.get("category"))
+    if forced:                      # 這一頁整頁都是同一種存款，表格標題一律換成該類別
+        rows = [["§", forced] if r[0] == "§" else r for r in rows]
+    return rows
+
+
 def read_bank(cfg):
     """先用一般方式讀；讀不到完整資料就改用瀏覽器再試一次。回傳 (資料, 模式說明)。"""
-    if not cfg.get("render"):
+    pages = cfg.get("pages") or [{"url": cfg["url"]}]
+    select = cfg.get("select")
+    if not cfg.get("render") and not select:
         try:
-            data = parse_rows(extract_rows(fetch(cfg["url"])), cfg)
+            rows = []
+            for pg in pages:
+                rows += page_rows(fetch(pg["url"]), pg)
+            data = parse_rows(rows, cfg)
             validate(data)
             return data, ""
         except Exception as e:      # noqa: BLE001
             print("      %s 一般方式讀不到（%s），改用瀏覽器" % (cfg["name"], e))
-    html = fetch_rendered(cfg["url"])
-    rows = extract_rows(html)
+    rows, htmls = [], []
+    for pg in pages:
+        for html in fetch_rendered(pg["url"], select, wait_any=bool(pg.get("category"))):
+            htmls.append(html)
+            rows += page_rows(html, pg)
     data = parse_rows(rows, cfg)
     try:
         validate(data)
     except ValueError:
-        debug_rows(html, rows)
+        debug_rows(htmls[-1] if htmls else "", rows)
         raise
     return data, "  （瀏覽器模式）"
 
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 11，共 %d 家銀行" % len(BANKS))
+    print("抓取程式版本 12，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
@@ -406,8 +512,8 @@ def main(only=None):
             if jumps:
                 raise ValueError("與前次相差超過 1 個百分點，請人工確認：%s" % jumps)
             entry.update(data, status="ok", fetched=now.isoformat(timespec="seconds"))
-            print("OK    %s  活儲 %.3f  一年定存(固定) %.3f%s" % (
-                cfg["name"], data["demand_savings"], data["time"]["12"]["fixed"], mode))
+            print("OK    %s  活儲 %.3f  一年期(固定) %.3f%s" % (
+                cfg["name"], data["demand_savings"], one_year(data), mode))
         except Exception as e:      # noqa: BLE001
             failed.append(cfg["name"])
             print("FAIL  %s  %s" % (cfg["name"], e))

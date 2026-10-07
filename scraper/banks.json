@@ -10,5 +10,16 @@
   {"id": "sinopac", "name": "永豐銀行", "url": "https://bank.sinopac.com/MMA8/bank/html/rate/bank_Interest.html", "render": true},
   {"id": "obank", "name": "王道銀行", "url": "https://www.o-bank.com/zh-tw/retail/cm/ratemain/cm-deprate", "demand_savings_labels": ["活期(儲)存款"]},
   {"id": "hsbc", "name": "滙豐（台灣）", "url": "https://www.hsbc.com.tw/handicap-free/deposit-rate/", "demand_savings_labels": ["個人理財活存"]},
-  {"id": "next", "name": "將來銀行", "url": "https://nebweb.nextbank.com.tw/corp/rates", "render": true}
+  {"id": "next", "name": "將來銀行", "url": "https://nebweb.nextbank.com.tw/corp/rates", "render": true},
+  {"id": "fubon", "name": "台北富邦", "url": "https://ebank.taipeifubon.com.tw/B2C/cfhqu/cfhqu012/CFHQU012_Home.faces?menuId=CFH0301&"},
+  {"id": "cathay", "name": "國泰世華", "url": "https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/rate/"},
+  {"id": "esun", "name": "玉山銀行", "url": "https://www.esunbank.com/zh-tw/personal/deposit/rate/twd/deposit-rate"},
+  {"id": "yuanta", "name": "元大銀行", "url": "https://www.yuantabank.com.tw/bank/exchangeRate/twRate.do"},
+  {"id": "kgi", "name": "凱基銀行", "url": "https://www.kgibank.com.tw/zh-tw/personal/interest-rate", "render": true},
+  {"id": "scsb", "name": "上海商銀", "url": "https://ebank.scsb.com.tw/info/info/page#/info/ir/01/01", "select": {"selector": "select#type", "values": ["1", "3", "5"]}},
+  {"id": "ubot", "name": "聯邦銀行", "url": "https://www.ubot.com.tw/rates/twd/deposit_rate", "render": true},
+  {"id": "feib", "name": "遠東商銀", "url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N", "pages": [{"url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDDepositRate"}, {"url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N", "category": "time"}]},
+  {"id": "entie", "name": "安泰銀行", "url": "https://www.entiebank.com.tw/entie/ntsRate_M", "render": true},
+  {"id": "line", "name": "LINE Bank", "url": "https://www.linebank.com.tw/board-rate/deposit-rate"},
+  {"id": "rakuten", "name": "樂天銀行", "url": "https://www.rakuten-bank.com.tw/portal/product/interest", "render": true}
 ]
