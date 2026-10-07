@@ -1,0 +1,128 @@
+{
+  "updated": "2026-10-07T13:43:24+08:00",
+  "banks": [
+    {
+      "id": "bot",
+      "name": "臺灣銀行",
+      "source": "https://rate.bot.com.tw/ir?Lang=zh-TW",
+      "rates": {
+        "USD": {
+          "demand": 0.6,
+          "time": {
+            "1": 2.0,
+            "3": 2.0,
+            "6": 2.0,
+            "9": 2.0,
+            "12": 2.05
+          }
+        },
+        "JPY": {
+          "demand": 0.1,
+          "time": {
+            "1": 0.35,
+            "3": 0.4,
+            "6": 0.5,
+            "9": 0.55,
+            "12": 0.6
+          }
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-07T13:43:24+08:00"
+    },
+    {
+      "id": "land",
+      "name": "土地銀行",
+      "source": "https://rate.landbank.com.tw/zh-TW/Foreign/ForeignCurrencyDRate?mid=38",
+      "rates": {
+        "USD": {
+          "demand": 0.6,
+          "time": {
+            "1": 2.0,
+            "3": 2.0,
+            "6": 2.0,
+            "9": 2.0,
+            "12": 2.05
+          }
+        },
+        "JPY": {
+          "demand": 0.1,
+          "time": {
+            "1": 0.35,
+            "3": 0.4,
+            "6": 0.5,
+            "9": 0.55,
+            "12": 0.6
+          }
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-07T13:43:24+08:00"
+    },
+    {
+      "id": "mega",
+      "name": "兆豐銀行",
+      "source": "https://www.megabank.com.tw/personal/savings/deposit-service/rate/foreign-rate",
+      "rates": {
+        "USD": {
+          "demand": 0.5,
+          "time": {
+            "1": 2.0,
+            "3": 2.0,
+            "6": 2.0,
+            "9": 2.0,
+            "12": 2.05
+          }
+        },
+        "JPY": {
+          "demand": 0.1,
+          "time": {
+            "1": 0.35,
+            "3": 0.4,
+            "6": 0.5,
+            "9": 0.55,
+            "12": 0.6
+          }
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-07T13:43:24+08:00"
+    },
+    {
+      "id": "cathay",
+      "name": "國泰世華",
+      "source": "https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/rate/",
+      "status": "failed",
+      "error": "找不到 USD 的利率"
+    },
+    {
+      "id": "esun",
+      "name": "玉山銀行",
+      "source": "https://www.esunbank.com/zh-tw/personal/deposit/rate/foreign/deposit-rate",
+      "rates": {
+        "USD": {
+          "demand": 0.5,
+          "time": {
+            "1": 2.0,
+            "3": 2.0,
+            "6": 2.1,
+            "9": 2.1,
+            "12": 2.1
+          }
+        },
+        "JPY": {
+          "demand": 0.1,
+          "time": {
+            "1": 0.35,
+            "3": 0.4,
+            "6": 0.5,
+            "9": 0.55,
+            "12": 0.6
+          }
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-07T13:43:24+08:00"
+    }
+  ]
+}
