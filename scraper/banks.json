@@ -1,26 +1,226 @@
 [
-  {"id": "bot", "name": "臺灣銀行", "url": "https://rate.bot.com.tw/twd?Lang=zh-TW"},
-  {"id": "land", "name": "土地銀行", "url": "https://rate.landbank.com.tw/zh-TW/TWDInfo?mid=23"},
-  {"id": "tcb", "name": "合作金庫", "url": "https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/deposit-rate/deposit-loans-rate/twd-deposit-rate", "categories": {"儲蓄存款": "savings"}, "demand_savings_labels": ["一般活儲"]},
-  {"id": "chb", "name": "彰化銀行", "url": "https://www.bankchb.com/frontend/G0210_020104_query.jsp", "render": true},
-  {"id": "fcb", "name": "第一銀行", "url": "https://ebank.firstbank.com.tw/BATcpibWeb/html/FQ1001.html"},
-  {"id": "mega", "name": "兆豐銀行", "url": "https://www.megabank.com.tw/personal/savings/deposit-service/rate/twd-rate", "render": true},
-  {"id": "tbb", "name": "臺灣企銀", "url": "https://www.tbb.com.tw/zh-tw/personal/deposits/inquiry/twd-interest-calculator"},
-  {"id": "taishin", "name": "台新銀行", "url": "https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/NTD/", "render": true},
-  {"id": "sinopac", "name": "永豐銀行", "url": "https://bank.sinopac.com/MMA8/bank/html/rate/bank_Interest.html", "render": true},
-  {"id": "obank", "name": "王道銀行", "url": "https://www.o-bank.com/zh-tw/retail/cm/ratemain/cm-deprate", "demand_savings_labels": ["活期(儲)存款"]},
-  {"id": "hsbc", "name": "滙豐（台灣）", "url": "https://www.hsbc.com.tw/handicap-free/deposit-rate/", "demand_savings_labels": ["個人理財活存"]},
-  {"id": "next", "name": "將來銀行", "url": "https://nebweb.nextbank.com.tw/corp/rates", "render": true},
-  {"id": "fubon", "name": "台北富邦", "url": "https://ebank.taipeifubon.com.tw/B2C/cfhqu/cfhqu012/CFHQU012_Home.faces?menuId=CFH0301&"},
-  {"id": "cathay", "name": "國泰世華", "url": "https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/rate/"},
-  {"id": "esun", "name": "玉山銀行", "url": "https://www.esunbank.com/zh-tw/personal/deposit/rate/twd/deposit-rate"},
-  {"id": "yuanta", "name": "元大銀行", "url": "https://www.yuantabank.com.tw/bank/exchangeRate/twRate.do"},
-  {"id": "kgi", "name": "凱基銀行", "url": "https://www.kgibank.com.tw/zh-tw/personal/interest-rate", "render": true},
-  {"id": "scsb", "name": "上海商銀", "url": "https://ebank.scsb.com.tw/info/info/page#/info/ir/01/01", "select": {"selector": "select#type", "values": ["1", "3", "5"]}},
-  {"id": "ubot", "name": "聯邦銀行", "url": "https://www.ubot.com.tw/rates/twd/deposit_rate", "render": true},
-  {"id": "feib", "name": "遠東商銀", "url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N", "pages": [{"url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDDepositRate"}, {"url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N", "category": "time"}]},
-  {"id": "entie", "name": "安泰銀行", "url": "https://www.entiebank.com.tw/entie/ntsRate_M", "render": true},
-  {"id": "line", "name": "LINE Bank", "url": "https://www.linebank.com.tw/board-rate/deposit-rate", "render": true},
-  {"id": "dbs", "name": "星展（台灣）", "url": "https://www.dbs.com.tw/personal-zh/rates/interest-rates.page"},
-  {"id": "scb", "name": "渣打銀行", "url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx", "pages": [{"url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=1"}, {"url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=2", "category": "time"}, {"url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=3", "category": "savings"}]}
+  {
+    "id": "bot",
+    "name": "臺灣銀行",
+    "url": "https://rate.bot.com.tw/twd?Lang=zh-TW"
+  },
+  {
+    "id": "land",
+    "name": "土地銀行",
+    "url": "https://rate.landbank.com.tw/zh-TW/TWDInfo?mid=23"
+  },
+  {
+    "id": "tcb",
+    "name": "合作金庫",
+    "url": "https://www.tcb-bank.com.tw/personal-banking/deposit-exchange/deposit-rate/deposit-loans-rate/twd-deposit-rate",
+    "categories": {
+      "儲蓄存款": "savings"
+    },
+    "demand_savings_labels": [
+      "一般活儲"
+    ]
+  },
+  {
+    "id": "chb",
+    "name": "彰化銀行",
+    "url": "https://www.bankchb.com/frontend/G0210_020104_query.jsp",
+    "render": true
+  },
+  {
+    "id": "fcb",
+    "name": "第一銀行",
+    "url": "https://ebank.firstbank.com.tw/BATcpibWeb/html/FQ1001.html"
+  },
+  {
+    "id": "mega",
+    "name": "兆豐銀行",
+    "url": "https://www.megabank.com.tw/personal/savings/deposit-service/rate/twd-rate",
+    "render": true
+  },
+  {
+    "id": "tbb",
+    "name": "臺灣企銀",
+    "url": "https://www.tbb.com.tw/zh-tw/personal/deposits/inquiry/twd-interest-calculator"
+  },
+  {
+    "id": "taishin",
+    "name": "台新銀行",
+    "url": "https://www.taishinbank.com.tw/TSB/personal/deposit/lookup/NTD/",
+    "render": true
+  },
+  {
+    "id": "sinopac",
+    "name": "永豐銀行",
+    "url": "https://bank.sinopac.com/MMA8/bank/html/rate/bank_Interest.html",
+    "render": true
+  },
+  {
+    "id": "obank",
+    "name": "王道銀行",
+    "url": "https://www.o-bank.com/zh-tw/retail/cm/ratemain/cm-deprate",
+    "demand_savings_labels": [
+      "活期(儲)存款"
+    ]
+  },
+  {
+    "id": "hsbc",
+    "name": "滙豐（台灣）",
+    "url": "https://www.hsbc.com.tw/handicap-free/deposit-rate/",
+    "demand_savings_labels": [
+      "個人理財活存"
+    ]
+  },
+  {
+    "id": "next",
+    "name": "將來銀行",
+    "url": "https://nebweb.nextbank.com.tw/corp/rates",
+    "render": true
+  },
+  {
+    "id": "fubon",
+    "name": "台北富邦",
+    "url": "https://ebank.taipeifubon.com.tw/B2C/cfhqu/cfhqu012/CFHQU012_Home.faces?menuId=CFH0301&"
+  },
+  {
+    "id": "cathay",
+    "name": "國泰世華",
+    "url": "https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/rate/"
+  },
+  {
+    "id": "esun",
+    "name": "玉山銀行",
+    "url": "https://www.esunbank.com/zh-tw/personal/deposit/rate/twd/deposit-rate"
+  },
+  {
+    "id": "yuanta",
+    "name": "元大銀行",
+    "url": "https://www.yuantabank.com.tw/bank/exchangeRate/twRate.do"
+  },
+  {
+    "id": "kgi",
+    "name": "凱基銀行",
+    "url": "https://www.kgibank.com.tw/zh-tw/personal/interest-rate",
+    "render": true
+  },
+  {
+    "id": "scsb",
+    "name": "上海商銀",
+    "url": "https://ebank.scsb.com.tw/info/info/page#/info/ir/01/01",
+    "select": {
+      "selector": "select#type",
+      "values": [
+        "1",
+        "3",
+        "5"
+      ]
+    }
+  },
+  {
+    "id": "ubot",
+    "name": "聯邦銀行",
+    "url": "https://www.ubot.com.tw/rates/twd/deposit_rate",
+    "render": true
+  },
+  {
+    "id": "feib",
+    "name": "遠東商銀",
+    "url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N",
+    "pages": [
+      {
+        "url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDDepositRate"
+      },
+      {
+        "url": "https://mbank.feib.com.tw/APPMBK/FinancialInfo/NTDCDRate?amountType=N",
+        "category": "time"
+      }
+    ]
+  },
+  {
+    "id": "entie",
+    "name": "安泰銀行",
+    "url": "https://www.entiebank.com.tw/entie/ntsRate_M",
+    "render": true
+  },
+  {
+    "id": "line",
+    "name": "LINE Bank",
+    "url": "https://www.linebank.com.tw/board-rate/deposit-rate",
+    "render": true
+  },
+  {
+    "id": "dbs",
+    "name": "星展（台灣）",
+    "url": "https://www.dbs.com.tw/personal-zh/rates/interest-rates.page"
+  },
+  {
+    "id": "scb",
+    "name": "渣打銀行",
+    "url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx",
+    "pages": [
+      {
+        "url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=1"
+      },
+      {
+        "url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=2",
+        "category": "time"
+      },
+      {
+        "url": "https://service.standardchartered.com.tw/tw/check/inquiry-rate-savings-account.aspx?CTID=3",
+        "category": "savings"
+      }
+    ]
+  },
+  {
+    "id": "sunny",
+    "name": "陽信銀行",
+    "url": "https://www.sunnybank.com.tw/portal/pt/pt02001/PT02001Index.xhtml"
+  },
+  {
+    "id": "bok",
+    "name": "高雄銀行",
+    "url": "https://accessible.bok.com.tw/NTRate_PB.jsp",
+    "pages": [
+      {
+        "url": "https://accessible.bok.com.tw/NTRate_PB.jsp"
+      },
+      {
+        "url": "https://accessible.bok.com.tw/NTRate_CTD.jsp",
+        "category": "time"
+      },
+      {
+        "url": "https://accessible.bok.com.tw/NTRate_CTDS.jsp",
+        "category": "savings"
+      }
+    ]
+  },
+  {
+    "id": "taichung",
+    "name": "台中銀行",
+    "url": "https://ibank.tcbbank.com.tw/PIB/cb5/cb501002/CB501002_01.faces"
+  },
+  {
+    "id": "bop",
+    "name": "板信銀行",
+    "url": "https://www.bop.com.tw/Deposite/P361?tni=361"
+  },
+  {
+    "id": "hwatai",
+    "name": "華泰銀行",
+    "url": "https://www.hwataibank.com.tw/personal/rate01-02/"
+  },
+  {
+    "id": "tstar",
+    "name": "瑞興銀行",
+    "url": "https://www.taipeistarbank.com.tw/DepositExchange/DepositRates"
+  },
+  {
+    "id": "ktb",
+    "name": "京城銀行",
+    "url": "https://customer.ktb.com.tw/new/personal/interest_rate_inquire"
+  },
+  {
+    "id": "cota",
+    "name": "三信銀行",
+    "url": "https://ibank.cotabank.com.tw/ibank/Interest_1.aspx"
+  }
 ]

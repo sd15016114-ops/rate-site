@@ -493,7 +493,7 @@ def read_bank(cfg):
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 13，共 %d 家銀行" % len(BANKS))
+    print("抓取程式版本 14，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
