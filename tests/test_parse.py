@@ -85,7 +85,7 @@ FCB = "<ul>" + "".join([li("活期存款", "一般", "0.70500"), li("活期存�
     li("大額定期儲蓄存款", "一 年", "0.87500", "0.86500")]) + "</ul>"
 
 def run(bank, html):
-    d = parse_rows(extract_rows(html), CFG[bank]); validate(d); return d
+    d = parse_rows(extract_rows(html), CFG.get(bank, {})); validate(d); return d
 
 def test_tenor():
     cases = {"一個月~未滿三個月": 1, "3至4個月": 3, "一、二個月": 1, "九、十、十一個月": 9, "十一個月": 11,
