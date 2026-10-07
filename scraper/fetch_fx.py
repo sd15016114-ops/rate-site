@@ -82,7 +82,7 @@ def heading_currency(table):
         t = re.sub(r"\s+", " ", s).strip()
         if not t:
             continue
-        if s.find_parent("table") is not None or s.find_parent(["option", "select", "script", "style"]):
+        if s.find_parent(["table", "li"]) is not None or s.find_parent(["option", "select", "script", "style"]):
             return None
         cur = currency_of(t)
         if cur or any(p.search(t) for p in CURRENCIES.values()):
@@ -110,10 +110,13 @@ def put(out, cur, key, val):
 def parse_fx(html):
     soup = make_soup(html)
     out = {}
-    for table in soup.find_all("table"):
+    for table in soup.find_all(["table", "ul"]):
         if table.find("table"):
             continue
-        rows = [[text_of(c) for c in tr.find_all(["th", "td"], recursive=False)] for tr in table.find_all("tr")]
+        if table.name == "ul":              # 有些銀行用清單排版：一個項目是「存期、利率」
+            rows = [[text_of(c) for c in li.find_all(True, recursive=False)] for li in table.find_all("li", recursive=False)]
+        else:
+            rows = [[text_of(c) for c in tr.find_all(["th", "td"], recursive=False)] for tr in table.find_all("tr")]
         rows = [r for r in rows if r]
         # 版型一：一列一個幣別，欄位是活期與各存期
         keys = []
@@ -203,7 +206,7 @@ def read_bank(cfg):
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("外幣抓取程式版本 1，共 %d 家銀行" % len(BANKS))
+    print("外幣抓取程式版本 2，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}

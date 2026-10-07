@@ -32,7 +32,8 @@ LAND = T((1, ["幣別", "活存", "1 個月", "3 個月", "6 個月", "9 個月"
          (0, ["美元(USD)", "0.6000", "2.0000", "2.0000", "2.0000", "2.0000", "2.0500", "1.6500", "1.2500", "活存：0.6000 1 個月：2.0000"]),
          (0, ["日圓(JPY)", "0.1000", "0.3500", "0.4000", "0.5000", "0.5500", "0.6000", "--", "--", "活存：0.1000"]))
 def card(name, rows):
-    return "<div class='card'><div class='head'><div class='name'>%s</div></div>%s</div>" % (name, T(*[(0, r) for r in rows]))
+    lis = "".join("<li><div class='n'><div>%s</div><div>%s</div></div><div class='r'> %s </div></li>" % (tuple(r[0].split(" ", 1)) + (r[1],)) for r in rows)
+    return "<div class='card'><div class='head'><img alt='US'><div class='name'> %s </div></div><ul>%s</ul></div>" % (name, lis)
 CATHAY = "<select><option>全部幣別</option><option>美元USD</option><option>日圓JPY</option></select>" + \
     card("美元USD", [["活期 Demand Deposit", "0.5%"], ["1星期 1 Week", "0.85%"], ["1個月 1 Month", "2%"], ["3個月 3 Months", "2%"],
                     ["6個月 6 Months", "2%"], ["9個月 9 Months", "2%"], ["1年 1 Year", "2.05%"], ["2年 2 Years", "2%"]]) + \
