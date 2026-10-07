@@ -249,8 +249,41 @@ def split_category(lab, categories):
     return None, None
 
 
+COMBINED = re.compile(r"^(定期|定儲)(固定|機動)(.+)$")
+
+
+def parse_combined(rows):
+    """京城銀行的版型：每列是「定期固定 1 個月〜未滿 3 個月 | 1.200%」，類別、固定機動、存期都寫在同一格。"""
+    out = {"demand": None, "demand_savings": None, "time": {}, "savings": {}}
+    for r in rows:
+        if len(r) < 2 or r[0] == "§":
+            continue
+        lab = re.sub(r"\s+", "", r[0])
+        m = LOOSE_RATE.search(r[-1])
+        if not m or any(w in lab for w in ("大額", "證券", "薪轉")):
+            continue
+        val = float(m.group(0))
+        if lab.startswith("活儲") and out["demand_savings"] is None:
+            out["demand_savings"] = val
+        elif lab.startswith("活期") and out["demand"] is None:
+            out["demand"] = val
+        else:
+            c = COMBINED.match(lab)
+            months = tenor_months(c.group(3)) if c else None
+            if months in TENORS:
+                group = out["time" if c.group(1) == "定期" else "savings"]
+                group.setdefault(str(months), {}).setdefault("fixed" if c.group(2) == "固定" else "floating", val)
+    for group in (out["time"], out["savings"]):
+        for r in group.values():
+            r.setdefault("fixed", r.get("floating"))
+            r.setdefault("floating", r.get("fixed"))
+    return out
+
+
 def parse_rows(rows, cfg=None):
     cfg = cfg or {}
+    if cfg.get("style") == "combined":
+        return parse_combined(rows)
     categories = {"定期存款": "time", "定期儲蓄存款": "savings"}
     categories.update(cfg.get("categories", {}))
     ds_labels = ["活期儲蓄存款", "活期儲蓄", "活儲存款", "活儲", "活儲息"] + cfg.get("demand_savings_labels", [])
@@ -456,6 +489,13 @@ FORCED_HEADING = {"time": "定期存款", "savings": "定期儲蓄存款"}
 
 
 def page_rows(html, page_cfg):
+    marker = page_cfg.get("start_after")
+    if marker:                      # 頁面前段有不要的舊表格：只看這段文字之後的內容
+        if isinstance(html, bytes):
+            html = html.decode("utf-8", "replace")
+        i = html.find(marker)
+        if i >= 0:
+            html = "<html><body>" + html[i:] + "</body></html>"
     rows = extract_rows(html)
     forced = FORCED_HEADING.get(page_cfg.get("category"))
     if forced:                      # 這一頁整頁都是同一種存款，表格標題一律換成該類別
@@ -493,7 +533,7 @@ def read_bank(cfg):
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 14，共 %d 家銀行" % len(BANKS))
+    print("抓取程式版本 15，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}

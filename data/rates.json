@@ -1276,13 +1276,6 @@
       "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
-      "id": "bok",
-      "name": "高雄銀行",
-      "source": "https://accessible.bok.com.tw/NTRate_PB.jsp",
-      "status": "failed",
-      "error": "Page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://accessible.bok.com.tw/NTRate_PB.jsp\", waiting until \"domcontentloaded\"\n"
-    },
-    {
       "id": "taichung",
       "name": "台中銀行",
       "source": "https://ibank.tcbbank.com.tw/PIB/cb5/cb501002/CB501002_01.faces",
@@ -1379,41 +1372,8 @@
       "id": "hwatai",
       "name": "華泰銀行",
       "source": "https://www.hwataibank.com.tw/personal/rate01-02/",
-      "demand": 0.135,
-      "demand_savings": 0.195,
-      "time": {
-        "1": {
-          "fixed": 0.725,
-          "floating": 0.725
-        },
-        "3": {
-          "fixed": 0.785,
-          "floating": 0.785
-        },
-        "6": {
-          "fixed": 0.935,
-          "floating": 0.935
-        },
-        "9": {
-          "fixed": 1.055,
-          "floating": 1.055
-        },
-        "12": {
-          "fixed": 1.19,
-          "floating": 1.19
-        },
-        "24": {
-          "fixed": 1.195,
-          "floating": 1.195
-        },
-        "36": {
-          "fixed": 1.2,
-          "floating": 1.2
-        }
-      },
-      "savings": {},
-      "status": "ok",
-      "fetched": "2026-10-07T14:04:20+08:00"
+      "status": "failed",
+      "error": "待重新抓取"
     },
     {
       "id": "tstar",

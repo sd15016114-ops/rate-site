@@ -176,24 +176,6 @@
     "url": "https://www.sunnybank.com.tw/portal/pt/pt02001/PT02001Index.xhtml"
   },
   {
-    "id": "bok",
-    "name": "高雄銀行",
-    "url": "https://accessible.bok.com.tw/NTRate_PB.jsp",
-    "pages": [
-      {
-        "url": "https://accessible.bok.com.tw/NTRate_PB.jsp"
-      },
-      {
-        "url": "https://accessible.bok.com.tw/NTRate_CTD.jsp",
-        "category": "time"
-      },
-      {
-        "url": "https://accessible.bok.com.tw/NTRate_CTDS.jsp",
-        "category": "savings"
-      }
-    ]
-  },
-  {
     "id": "taichung",
     "name": "台中銀行",
     "url": "https://ibank.tcbbank.com.tw/PIB/cb5/cb501002/CB501002_01.faces"
@@ -206,7 +188,16 @@
   {
     "id": "hwatai",
     "name": "華泰銀行",
-    "url": "https://www.hwataibank.com.tw/personal/rate01-02/"
+    "url": "https://www.hwataibank.com.tw/personal/rate01-02/",
+    "pages": [
+      {
+        "url": "https://www.hwataibank.com.tw/personal/rate01-02/",
+        "start_after": "單位：年利率"
+      }
+    ],
+    "categories": {
+      "定期儲蓄": "savings"
+    }
   },
   {
     "id": "tstar",
@@ -216,7 +207,8 @@
   {
     "id": "ktb",
     "name": "京城銀行",
-    "url": "https://customer.ktb.com.tw/new/personal/interest_rate_inquire"
+    "url": "https://customer.ktb.com.tw/new/personal/interest_rate_inquire",
+    "style": "combined"
   },
   {
     "id": "cota",
