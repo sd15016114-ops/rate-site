@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-07T13:46:11+08:00",
+  "updated": "2026-10-07T14:04:20+08:00",
   "banks": [
     {
       "id": "bot",
@@ -52,7 +52,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "land",
@@ -105,7 +105,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "tcb",
@@ -158,7 +158,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "chb",
@@ -211,7 +211,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "fcb",
@@ -264,7 +264,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "mega",
@@ -317,7 +317,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "tbb",
@@ -370,7 +370,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "taishin",
@@ -423,7 +423,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "sinopac",
@@ -476,7 +476,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "obank",
@@ -529,7 +529,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "hsbc",
@@ -569,7 +569,7 @@
       },
       "savings": {},
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "next",
@@ -609,7 +609,7 @@
       },
       "savings": {},
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "fubon",
@@ -662,7 +662,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "cathay",
@@ -715,7 +715,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "esun",
@@ -768,7 +768,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "yuanta",
@@ -821,7 +821,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "kgi",
@@ -874,7 +874,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "scsb",
@@ -927,7 +927,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "ubot",
@@ -980,7 +980,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "feib",
@@ -1020,7 +1020,7 @@
       },
       "savings": {},
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "entie",
@@ -1073,7 +1073,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "line",
@@ -1114,7 +1114,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "dbs",
@@ -1167,7 +1167,7 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
     },
     {
       "id": "scb",
@@ -1220,7 +1220,300 @@
         }
       },
       "status": "ok",
-      "fetched": "2026-10-07T13:46:11+08:00"
+      "fetched": "2026-10-07T14:04:20+08:00"
+    },
+    {
+      "id": "sunny",
+      "name": "陽信銀行",
+      "source": "https://www.sunnybank.com.tw/portal/pt/pt02001/PT02001Index.xhtml",
+      "demand": 0.61,
+      "demand_savings": 0.65,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.285,
+          "floating": 1.285
+        },
+        "6": {
+          "fixed": 1.465,
+          "floating": 1.46
+        },
+        "9": {
+          "fixed": 1.58,
+          "floating": 1.575
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.69
+        },
+        "24": {
+          "fixed": 1.715,
+          "floating": 1.715
+        },
+        "36": {
+          "fixed": 1.715,
+          "floating": 1.715
+        }
+      },
+      "savings": {
+        "12": {
+          "fixed": 1.725,
+          "floating": 1.725
+        },
+        "24": {
+          "fixed": 1.76,
+          "floating": 1.76
+        },
+        "36": {
+          "fixed": 1.77,
+          "floating": 1.77
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-07T14:04:20+08:00"
+    },
+    {
+      "id": "bok",
+      "name": "高雄銀行",
+      "source": "https://accessible.bok.com.tw/NTRate_PB.jsp",
+      "status": "failed",
+      "error": "Page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://accessible.bok.com.tw/NTRate_PB.jsp\", waiting until \"domcontentloaded\"\n"
+    },
+    {
+      "id": "taichung",
+      "name": "台中銀行",
+      "source": "https://ibank.tcbbank.com.tw/PIB/cb5/cb501002/CB501002_01.faces",
+      "demand": 0.705,
+      "demand_savings": 0.825,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.29,
+          "floating": 1.285
+        },
+        "6": {
+          "fixed": 1.465,
+          "floating": 1.46
+        },
+        "9": {
+          "fixed": 1.58,
+          "floating": 1.575
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.69
+        },
+        "24": {
+          "fixed": 1.715,
+          "floating": 1.705
+        },
+        "36": {
+          "fixed": 1.715,
+          "floating": 1.705
+        }
+      },
+      "savings": {},
+      "status": "ok",
+      "fetched": "2026-10-07T14:04:20+08:00"
+    },
+    {
+      "id": "bop",
+      "name": "板信銀行",
+      "source": "https://www.bop.com.tw/Deposite/P361?tni=361",
+      "demand": 0.4,
+      "demand_savings": 0.75,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.275,
+          "floating": 1.275
+        },
+        "6": {
+          "fixed": 1.425,
+          "floating": 1.415
+        },
+        "9": {
+          "fixed": 1.545,
+          "floating": 1.535
+        },
+        "12": {
+          "fixed": 1.68,
+          "floating": 1.66
+        },
+        "24": {
+          "fixed": 1.68,
+          "floating": 1.66
+        },
+        "36": {
+          "fixed": 1.68,
+          "floating": 1.66
+        }
+      },
+      "savings": {
+        "12": {
+          "fixed": 1.765,
+          "floating": 1.695
+        },
+        "24": {
+          "fixed": 1.765,
+          "floating": 1.695
+        },
+        "36": {
+          "fixed": 1.765,
+          "floating": 1.695
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-07T14:04:20+08:00"
+    },
+    {
+      "id": "hwatai",
+      "name": "華泰銀行",
+      "source": "https://www.hwataibank.com.tw/personal/rate01-02/",
+      "demand": 0.135,
+      "demand_savings": 0.195,
+      "time": {
+        "1": {
+          "fixed": 0.725,
+          "floating": 0.725
+        },
+        "3": {
+          "fixed": 0.785,
+          "floating": 0.785
+        },
+        "6": {
+          "fixed": 0.935,
+          "floating": 0.935
+        },
+        "9": {
+          "fixed": 1.055,
+          "floating": 1.055
+        },
+        "12": {
+          "fixed": 1.19,
+          "floating": 1.19
+        },
+        "24": {
+          "fixed": 1.195,
+          "floating": 1.195
+        },
+        "36": {
+          "fixed": 1.2,
+          "floating": 1.2
+        }
+      },
+      "savings": {},
+      "status": "ok",
+      "fetched": "2026-10-07T14:04:20+08:00"
+    },
+    {
+      "id": "tstar",
+      "name": "瑞興銀行",
+      "source": "https://www.taipeistarbank.com.tw/DepositExchange/DepositRates",
+      "demand": 0.415,
+      "demand_savings": 0.6,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.255,
+          "floating": 1.285
+        },
+        "6": {
+          "fixed": 1.415,
+          "floating": 1.455
+        },
+        "9": {
+          "fixed": 1.545,
+          "floating": 1.555
+        },
+        "12": {
+          "fixed": 1.645,
+          "floating": 1.645
+        },
+        "24": {
+          "fixed": 1.67,
+          "floating": 1.675
+        },
+        "36": {
+          "fixed": 1.67,
+          "floating": 1.675
+        }
+      },
+      "savings": {
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.7
+        },
+        "24": {
+          "fixed": 1.705,
+          "floating": 1.705
+        },
+        "36": {
+          "fixed": 1.71,
+          "floating": 1.71
+        }
+      },
+      "status": "ok",
+      "fetched": "2026-10-07T14:04:20+08:00"
+    },
+    {
+      "id": "ktb",
+      "name": "京城銀行",
+      "source": "https://customer.ktb.com.tw/new/personal/interest_rate_inquire",
+      "status": "failed",
+      "error": "定期存款缺少存期（月）：[1, 3, 6]"
+    },
+    {
+      "id": "cota",
+      "name": "三信銀行",
+      "source": "https://ibank.cotabank.com.tw/ibank/Interest_1.aspx",
+      "demand": 0.535,
+      "demand_savings": 0.725,
+      "time": {
+        "1": {
+          "fixed": 1.225,
+          "floating": 1.225
+        },
+        "3": {
+          "fixed": 1.275,
+          "floating": 1.275
+        },
+        "6": {
+          "fixed": 1.44,
+          "floating": 1.43
+        },
+        "9": {
+          "fixed": 1.555,
+          "floating": 1.545
+        },
+        "12": {
+          "fixed": 1.7,
+          "floating": 1.69
+        },
+        "24": {
+          "fixed": 1.715,
+          "floating": 1.705
+        },
+        "36": {
+          "fixed": 1.725,
+          "floating": 1.715
+        }
+      },
+      "savings": {},
+      "status": "ok",
+      "fetched": "2026-10-07T14:04:20+08:00"
     }
   ]
 }
