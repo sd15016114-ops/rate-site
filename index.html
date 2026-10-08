@@ -70,7 +70,7 @@ body.fxmode nav.jump{display:none}
 .chart .low{fill:var(--seal)}
 .chart text{fill:var(--muted);font-size:19px;font-family:var(--sans)}
 .fxtable{overflow-x:auto;background:var(--sheet);border:1px solid var(--rule);margin-top:14px}
-.fxtable table{border-collapse:collapse;width:100%;min-width:520px}
+.fxtable table{border-collapse:collapse;width:100%;min-width:600px}
 .fxtable th,.fxtable td{padding:8px 16px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
 .fxtable th{font-weight:500;color:var(--muted);font-size:13px;background:var(--paper)}
 .fxtable th:first-child,.fxtable td:first-child{text-align:left}
@@ -257,12 +257,12 @@ footer p{margin:0 0 6px;max-width:50em}
       <p class="lead" id="dayLead"></p>
       <div class="fxtable" id="dayWrap"><table>
         <thead>
-          <tr><th rowspan="2">幣別</th><th colspan="2" class="grp b">現金匯率</th><th colspan="2" class="grp b">即期匯率</th></tr>
-          <tr><th class="b">買入</th><th>賣出</th><th class="b">買入</th><th>賣出</th></tr>
+          <tr><th rowspan="2">幣別</th><th colspan="2" class="grp b">現金匯率</th><th colspan="3" class="grp b">即期匯率</th></tr>
+          <tr><th class="b">買入</th><th>賣出</th><th class="b">買入</th><th>賣出</th><th>平均</th></tr>
         </thead>
         <tbody id="dayRows"></tbody>
       </table></div>
-      <p class="fine">「買入」是銀行跟你買外幣的價格（你把外幣換回臺幣），「賣出」是銀行賣外幣給你的價格（你用臺幣買外幣）。「—」代表臺銀那個幣別沒有提供該種匯率。</p>
+      <p class="fine">「買入」是銀行跟你買外幣的價格（你把外幣換回臺幣），「賣出」是銀行賣外幣給你的價格（你用臺幣買外幣）。「平均」是即期買入與賣出相加除以二，可以當作當天的中間價參考。「—」代表臺銀那個幣別沒有提供該種匯率。</p>
     </section>
 
     <section class="block">
@@ -281,8 +281,8 @@ footer p{margin:0 0 6px;max-width:50em}
       <p class="fine" id="chartNote"></p>
       <div class="fxtable"><table>
         <thead>
-          <tr><th rowspan="2">日期</th><th colspan="2" class="grp b">現金匯率</th><th colspan="2" class="grp b">即期匯率</th></tr>
-          <tr><th class="b">買入</th><th>賣出</th><th class="b">買入</th><th>賣出</th></tr>
+          <tr><th rowspan="2">日期</th><th colspan="2" class="grp b">現金匯率</th><th colspan="3" class="grp b">即期匯率</th></tr>
+          <tr><th class="b">買入</th><th>賣出</th><th class="b">買入</th><th>賣出</th><th>平均</th></tr>
         </thead>
         <tbody id="trendRows"></tbody>
       </table></div>
@@ -536,6 +536,8 @@ function two(n){ return (n<10?'0':'')+n; }
 function ymd(d){ return d.getFullYear()+'-'+two(d.getMonth()+1)+'-'+two(d.getDate()); }
 function slash(k){ return k.replace(/-/g,'/'); }
 function fxv(v){ return +v ? String(v) : '—'; }
+/* 即期買入與賣出的平均（中間價）；任一邊沒有報價就不算 */
+function mid(x){ return +x[1] && +x[3] ? parseFloat(((x[1]+x[3])/2).toFixed(6)) : 0; }
 function onOrBefore(k){ for(var i=HDATES.length-1;i>=0;i--) if(HDATES[i]<=k) return HDATES[i]; return null; }
 function fillSel(id, from, to, text){ var h=''; for(var i=from;i<=to;i++) h+='<option value="'+(text?i:two(i))+'">'+i+'</option>'; $(id).innerHTML=h; }
 function pickedDay(){ return $('qy').value+'-'+$('qm').value+'-'+$('qd').value; }
@@ -561,7 +563,7 @@ function renderDay(){
   var codes = FXORDER.filter(function(c){ return d[c]; });
   $('dayLead').textContent = '共 '+codes.length+' 種幣別，當天最後一次掛牌的價格。';
   $('dayRows').innerHTML = codes.map(function(c){ var x=d[c];
-    return '<tr><td>'+FXNAMES[c]+' '+c+'</td><td class="b">'+fxv(x[0])+'</td><td>'+fxv(x[2])+'</td><td class="b">'+fxv(x[1])+'</td><td>'+fxv(x[3])+'</td></tr>'; }).join('');
+    return '<tr><td>'+FXNAMES[c]+' '+c+'</td><td class="b">'+fxv(x[0])+'</td><td>'+fxv(x[2])+'</td><td class="b">'+fxv(x[1])+'</td><td>'+fxv(x[3])+'</td><td>'+fxv(mid(x))+'</td></tr>'; }).join('');
 }
 function pressedIn(id){ return $(id).querySelector('[aria-pressed=true]'); }
 function renderTrend(){
@@ -593,7 +595,7 @@ function renderTrend(){
   var SHOW = 66, rows = ds.slice(-SHOW).reverse();
   $('trendRows').innerHTML = rows.map(function(d){
     var x = HIST[d][cur], i = all.indexOf(d), p = i>0 ? HIST[all[i-1]][cur][k] : null, cls = p==null ? '' : x[k]>p ? 'up' : x[k]<p ? 'down' : '';
-    return '<tr><td>'+slash(d)+'</td><td class="b'+(k===0?' '+cls:'')+'">'+f(x[0])+'</td><td class="'+(k===2?cls:'')+'">'+f(x[2])+'</td><td class="b">'+f(x[1])+'</td><td class="'+(k===3?cls:'')+'">'+f(x[3])+'</td></tr>'; }).join('');
+    return '<tr><td>'+slash(d)+'</td><td class="b'+(k===0?' '+cls:'')+'">'+f(x[0])+'</td><td class="'+(k===2?cls:'')+'">'+f(x[2])+'</td><td class="b">'+f(x[1])+'</td><td class="'+(k===3?cls:'')+'">'+f(x[3])+'</td><td>'+fxv(mid(x))+'</td></tr>'; }).join('');
   $('trendNote').textContent = (ds.length>SHOW ? '表格只列最近 '+SHOW+' 個營業日；更早的日期請用上方的日期查詢。' : '')+'紅色代表比前一個營業日貴，綠色代表比較便宜。';
 }
 function loadHist(){
