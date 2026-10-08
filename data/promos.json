@@ -424,5 +424,18 @@
     "end": "2026/10/30",
     "url": "https://corp.linebank.com.tw/news/888ca439-b987-4d7a-ad1b-c3407d803d56",
     "checked": "2026/10/08"
+  },
+  {
+    "bank": "bot",
+    "name": "115 年數位存款帳戶優惠方案",
+    "type": "活存",
+    "rate": 2.075,
+    "cap": 10,
+    "months": 3,
+    "who": "open",
+    "cond": "需為臺銀新臺幣數位存款帳戶；利率為一年期定儲機動利率（目前 1.715%）加 0.36%，會隨牌告調整；每日餘額未達 5,000 元不計息",
+    "end": "2026/12/31",
+    "checked": "2026/10/08",
+    "url": "https://www.bot.com.tw/tw/other-pages/more-offers/detail/2f10358e-5bc4-f011-a707-98f2b3145f40"
   }
 ]
