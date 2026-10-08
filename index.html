@@ -215,16 +215,19 @@ var WHO = {open:'不限', new:'新戶限定', task:'需完成任務', pay:'薪�
 /* 額度說明：有最低金額時寫成「75 萬以上、300 萬內」 */
 function range(p){ return (p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'; }
 /* 利率說明：分段計息的活動會把每一段都列出來，例如「10 萬內 12%，10–20 萬 2.1%」 */
+/* 分段裡利率留空（null）代表那一段照牌告利率 */
+function tp(r){ return r==null ? '牌告利率' : pct(r); }
+function headline(p){ return Math.max.apply(null,[p.rate].concat((p.tiers||[]).map(function(t){ return t.rate; })).filter(function(r){ return r!=null; })); }
 function terms(p){
   var prev = p.cap;
-  return range(p)+' '+pct(p.rate)+(p.tiers||[]).map(function(t){ var x='，'+(t.cap>=99999?'超過 '+prev+' 萬':prev+'–'+t.cap+' 萬')+' '+pct(t.rate); prev=t.cap; return x; }).join('');
+  return range(p)+' '+tp(p.rate)+(p.tiers||[]).map(function(t){ var x='，'+(t.cap>=99999?'超過 '+prev+' 萬':prev+'–'+t.cap+' 萬')+' '+tp(t.rate); prev=t.cap; return x; }).join('');
 }
 /* 活動期間內「金額 × 利率」的加總：依各段額度套用各段利率，超過最後一段的部分用牌告利率 rest */
 function weighted(p, amount, rest){
   var segs = [{cap:p.cap, rate:p.rate}].concat(p.tiers||[]), prev = 0, sum = 0;
   segs.forEach(function(g){
     var top = Math.min(amount, g.cap*10000);
-    if(top>prev){ sum += (top-prev)*g.rate; prev = top; }
+    if(top>prev){ sum += (top-prev)*(g.rate==null?rest:g.rate); prev = top; }
   });
   return sum + Math.max(0, amount-prev)*rest;
 }
@@ -294,7 +297,7 @@ function options(amount, months, allow){
       if(p.months>months || fx==null) return;
       interest = weighted(p,amount,fx)/100*p.months/12 + amount*b.demand/100*(months-p.months)/12;
     }
-    list.push({id:b.id, bank:b.name, plan:p.name, promo:true, rate:p.rate, interest:interest,
+    list.push({id:b.id, bank:b.name, plan:p.name, promo:true, rate:(p.rate==null?headline(p):p.rate), interest:interest,
       tags:[p.type, range(p), p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期'].concat(p.who!=='open'?[WHO[p.who]]:[])});
   });
   list.sort(function(a,b){ return b.interest-a.interest; });

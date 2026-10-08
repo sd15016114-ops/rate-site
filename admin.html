@@ -162,7 +162,7 @@ function render(){
   var t = today();
   $('list').innerHTML = PROMOS.length ? PROMOS.map(function(p,i){
     return '<div class="item"><div><b>'+esc(bankName(p.bank))+'｜'+esc(p.name)+'</b>'
-      + '<div class="meta">'+p.type+' '+p.rate+'%，'+(p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'+(p.tiers||[]).map(function(t){ return '、到 '+t.cap+' 萬 '+t.rate+'%'; }).join('')+'，'
+      + '<div class="meta">'+p.type+' '+(p.rate==null?'牌告利率':p.rate+'%')+'，'+(p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'+(p.tiers||[]).map(function(t){ return '、到 '+t.cap+' 萬 '+(t.rate==null?'牌告利率':t.rate+'%'); }).join('')+'，'
       + (p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期')+'，'+WHO[p.who]+'</div>'
       + '<div class="meta'+(p.end<t?' expired':'')+'">到 '+esc(p.end)+(p.end<t?'（已過期，網站不會顯示）':'')+'，最後確認 '+esc(p.checked)+'</div></div>'
       + '<div class="acts"><button type="button" class="ghost small" data-edit="'+i+'">修改</button>'

@@ -258,5 +258,63 @@
     "end": "2026/10/08",
     "url": "https://www.dbs.com.tw/treasures-private-client-zh/dbs-forms/depositfcy/TPCplus-sub3.page",
     "checked": "2026/10/07"
+  },
+  {
+    "bank": "kgi",
+    "name": "Karry 數位帳戶臺幣活儲（新戶）",
+    "type": "活存",
+    "rate": 8.8,
+    "cap": 5,
+    "tiers": [
+      {
+        "cap": 30,
+        "rate": null
+      },
+      {
+        "cap": 100,
+        "rate": 1.28
+      },
+      {
+        "cap": 200,
+        "rate": 1.78
+      },
+      {
+        "cap": 300,
+        "rate": 1.98
+      }
+    ],
+    "months": 3,
+    "who": "new",
+    "cond": "活動期間新開數位帳戶，且每月完成六項任務之一（如他行單筆轉入 2 萬）；每日餘額未達 1 萬不計息",
+    "end": "2026/12/30",
+    "checked": "2026/10/08",
+    "url": "https://www.kgibank.com.tw/webpages/digital-deposit-nd3-campaign/index.html#benefits"
+  },
+  {
+    "bank": "kgi",
+    "name": "Karry 數位帳戶臺幣活儲（既有戶）",
+    "type": "活存",
+    "rate": null,
+    "cap": 30,
+    "tiers": [
+      {
+        "cap": 100,
+        "rate": 1.28
+      },
+      {
+        "cap": 200,
+        "rate": 1.78
+      },
+      {
+        "cap": 300,
+        "rate": 1.98
+      }
+    ],
+    "months": 3,
+    "who": "task",
+    "cond": "每月完成任務之一（如他行單筆轉入 2 萬）；30 萬以上才有加碼；每日餘額未達 1 萬不計息",
+    "end": "2026/12/30",
+    "checked": "2026/10/08",
+    "url": "https://www.kgibank.com.tw/webpages/digital-deposit-nd3-campaign/index.html#benefits"
   }
 ]
