@@ -316,5 +316,113 @@
     "end": "2026/12/30",
     "checked": "2026/10/08",
     "url": "https://www.kgibank.com.tw/webpages/digital-deposit-nd3-campaign/index.html#benefits"
+  },
+  {
+    "bank": "yuanta",
+    "name": "數位存款帳戶活儲優利（新戶）",
+    "type": "活存",
+    "rate": 12,
+    "cap": 5,
+    "tiers": [
+      {
+        "cap": 50,
+        "rate": 0.825
+      },
+      {
+        "cap": 100,
+        "rate": 0.885
+      },
+      {
+        "cap": 99999,
+        "rate": 1.125
+      }
+    ],
+    "months": 1,
+    "who": "new",
+    "cond": "未曾持有元大臺幣帳戶，經元大e櫃檯開立數位存款帳戶，限量 5 萬戶；5 萬以上各段為牌告加碼（依 0.725% 牌告換算）；日終餘額未達 1 萬不計息",
+    "end": "2027/03/31",
+    "url": "https://www.yuantabank.com.tw/bankwebIMG/event/Bank_Act2026/savingrewards/index.html",
+    "checked": "2026/10/08"
+  },
+  {
+    "bank": "yuanta",
+    "name": "數位存款帳戶活儲優利（既有戶）",
+    "type": "活存",
+    "rate": 0.825,
+    "cap": 50,
+    "tiers": [
+      {
+        "cap": 100,
+        "rate": 0.885
+      },
+      {
+        "cap": 99999,
+        "rate": 1.125
+      }
+    ],
+    "months": 6,
+    "who": "open",
+    "cond": "需開立一般臺幣數位存款帳戶；各段為牌告加碼 0.10／0.16／0.40%（依 0.725% 牌告換算）；日終餘額未達 1 萬不計息",
+    "end": "2027/03/31",
+    "url": "https://www.yuantabank.com.tw/bankwebIMG/event/Bank_Act2026/savingrewards/index.html",
+    "checked": "2026/10/08"
+  },
+  {
+    "bank": "fubon",
+    "name": "數位帳戶新戶活儲最高 8%",
+    "type": "活存",
+    "rate": 1,
+    "cap": 15,
+    "tiers": [
+      {
+        "cap": 20,
+        "rate": 8
+      }
+    ],
+    "months": 6,
+    "who": "new",
+    "cond": "從未持有台北富邦存款帳戶，開戶成功日起 180 天；日終餘額未達 5,000 元不計息；每半年付息",
+    "end": "2026/12/31",
+    "url": "https://www.fubon.com/banking/event/deposit/FubonDSAPromotion/index.html",
+    "checked": "2026/10/08"
+  },
+  {
+    "bank": "line",
+    "name": "口袋帳戶",
+    "type": "活存",
+    "rate": 1.5,
+    "cap": 3000,
+    "months": 36,
+    "who": "open",
+    "cond": "免綁約、免任務，隨存隨取",
+    "end": "",
+    "url": "https://corp.linebank.com.tw/news/c041a7d4-896f-4963-a752-307c6fab31f2",
+    "checked": "2026/10/08"
+  },
+  {
+    "bank": "line",
+    "name": "台幣專案定存 6 個月（不限新舊資金）",
+    "type": "定存",
+    "rate": 1.88,
+    "cap": 6000,
+    "months": 6,
+    "who": "open",
+    "cond": "每筆最高 300 萬、最多 20 筆；可選每月或到期領息",
+    "end": "2026/10/30",
+    "url": "https://corp.linebank.com.tw/news/888ca439-b987-4d7a-ad1b-c3407d803d56",
+    "checked": "2026/10/08"
+  },
+  {
+    "bank": "line",
+    "name": "台幣專案定存 12 個月（不限新舊資金）",
+    "type": "定存",
+    "rate": 1.95,
+    "cap": 6000,
+    "months": 12,
+    "who": "open",
+    "cond": "每筆最高 300 萬、最多 20 筆；可選每月或到期領息",
+    "end": "2026/10/30",
+    "url": "https://corp.linebank.com.tw/news/888ca439-b987-4d7a-ad1b-c3407d803d56",
+    "checked": "2026/10/08"
   }
 ]

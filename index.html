@@ -218,6 +218,8 @@ function range(p){ return (p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'; }
 /* 分段裡利率留空（null）代表那一段照牌告利率 */
 function tp(r){ return r==null ? '牌告利率' : pct(r); }
 function headline(p){ return Math.max.apply(null,[p.rate].concat((p.tiers||[]).map(function(t){ return t.rate; })).filter(function(r){ return r!=null; })); }
+/* 優惠期間說明：沒有截止日的常態活存方案寫「不限期間」 */
+function dur(p){ return p.type!=='活存' ? span(p.months)+'期' : p.end ? '可享 '+span(p.months) : '不限期間'; }
 function terms(p){
   var prev = p.cap;
   return range(p)+' '+tp(p.rate)+(p.tiers||[]).map(function(t){ var x='，'+(t.cap>=99999?'超過 '+prev+' 萬':prev+'–'+t.cap+' 萬')+' '+tp(t.rate); prev=t.cap; return x; }).join('');
@@ -294,11 +296,12 @@ function options(amount, months, allow){
       interest = weighted(p,amount,b.demand)/100*pm/12 + amount*b.demand/100*(months-pm)/12;
     }else{
       var fx = b.fixed[TENORS.indexOf(p.months)];
-      if(p.months>months || fx==null) return;
+      if(p.months>months) return;
+      if(fx==null) fx = b.demand;      /* 這家沒有同天期牌告時，超過額度的部分以活儲利率估算 */
       interest = weighted(p,amount,fx)/100*p.months/12 + amount*b.demand/100*(months-p.months)/12;
     }
-    list.push({id:b.id, bank:b.name, plan:p.name, promo:true, rate:(p.rate==null?headline(p):p.rate), interest:interest,
-      tags:[p.type, range(p), p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期'].concat(p.who!=='open'?[WHO[p.who]]:[])});
+    list.push({id:b.id, bank:b.name, plan:p.name, promo:true, rate:headline(p), interest:interest,
+      tags:[p.type, p.tiers&&p.tiers.length ? '分段計息' : range(p), dur(p)].concat(p.who!=='open'?[WHO[p.who]]:[])});
   });
   list.sort(function(a,b){ return b.interest-a.interest; });
   return list;
@@ -359,8 +362,8 @@ function renderBanks(st, list){
       + TENORS.map(function(t){ return '<th>'+span(t)+'</th>'; }).join('') + '</tr><tr><td>'+num(b.demand)+'</td>'
       + b.fixed.map(function(x){ return '<td>'+num(x)+'</td>'; }).join('') + '</tr></table></div>'
       + (promos.length ? '<h3>活動優惠</h3><ul>'+promos.map(function(p){
-          return '<li><b>'+esc(p.name)+'</b>（'+p.type+'）：'+terms(p)+'，'+(p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期')
-            +'。資格：'+WHO[p.who]+'，'+esc(p.cond)+'。活動到 '+esc(p.end)+'，最後確認 '+esc(p.checked)+'。'
+          return '<li><b>'+esc(p.name)+'</b>（'+p.type+'）：'+terms(p)+'，'+(dur(p))
+            +'。資格：'+WHO[p.who]+'，'+esc(p.cond)+'。'+(p.end?'活動到 '+esc(p.end):'未公告截止日')+'，最後確認 '+esc(p.checked)+'。'
             +(p.url?' <a href="'+esc(p.url)+'" target="_blank" rel="noopener">活動頁面</a>':'')+'</li>'; }).join('')+'</ul>' : '')
       + '<p class="fine">'+(b.fetched?'利率擷取時間 '+day(b.fetched)+'。':'')
       + (b.source?'<a href="'+esc(b.source)+'" target="_blank" rel="noopener">查看銀行官網牌告</a>':'')+'</p></div></details>';
