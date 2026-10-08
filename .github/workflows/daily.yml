@@ -27,14 +27,18 @@ jobs:
         id: fx
         run: python scraper/fetch_fx.py
         continue-on-error: true
+      - name: 累積臺銀歷史匯率
+        id: fxhist
+        run: python scraper/fetch_fx_history.py
+        continue-on-error: true
       - name: 提交變更
         run: |
           git config user.name "rate-bot"
           git config user.email "rate-bot@users.noreply.github.com"
-          git add data/rates.json data/fx_rates.json
+          git add data/rates.json data/fx_rates.json; git add data/fx_history_*.json 2>/dev/null || true
           git diff --cached --quiet || git commit -m "利率更新 $(date -u +%F)"
           git pull --rebase origin main   # 執行期間若有其他更新推上來，先接上再推
           git push
       - name: 有銀行抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
-        if: steps.fetch.outcome == 'failure' || steps.fx.outcome == 'failure'
+        if: steps.fetch.outcome == 'failure' || steps.fx.outcome == 'failure' || steps.fxhist.outcome == 'failure'
         run: exit 1
