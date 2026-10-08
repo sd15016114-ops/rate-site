@@ -70,10 +70,11 @@ ol li{margin-bottom:6px}
     <div class="grid">
       <label>銀行<select id="f_bank"></select></label>
       <label>方案名稱<input id="f_name" placeholder="例如：數位帳戶新戶優惠"></label>
+      <label>幣別<small>美元的額度填實際美元金額，日圓填萬日圓</small><select id="f_cur"><option value="TWD">臺幣</option><option value="USD">美元</option><option value="JPY">日圓</option></select></label>
       <label>類型<select id="f_type"><option>活存</option><option>定存</option></select></label>
       <label>年利率（%）<input id="f_rate" type="number" step="0.001" min="0" max="20" inputmode="decimal" placeholder="例如：2.5"></label>
-      <label>額度上限（萬元）<small>超過的部分回到牌告利率</small><input id="f_cap" type="number" min="0" step="1" inputmode="numeric" placeholder="例如：10"></label>
-      <label>最低金額（萬元）<small>沒有門檻就留空</small><input id="f_min" type="number" min="0" step="1" inputmode="numeric"></label>
+      <label>額度上限（萬元／美元／萬日圓）<small>超過的部分回到牌告利率</small><input id="f_cap" type="number" min="0" step="1" inputmode="numeric" placeholder="例如：10"></label>
+      <label>最低金額（單位同上）<small>沒有門檻就留空</small><input id="f_min" type="number" min="0" step="1" inputmode="numeric"></label>
       <label id="l_months">優惠可享幾個月<input id="f_months" type="number" min="1" max="60" step="1" inputmode="numeric" placeholder="例如：6"></label>
       <label id="l_term" hidden>定存存期<select id="f_term"><option value="1">1 個月</option><option value="3">3 個月</option><option value="6">6 個月</option><option value="12">1 年</option><option value="24">2 年</option><option value="36">3 年</option></select></label>
       <label>適用資格<select id="f_who"><option value="open">不限</option><option value="new">新戶限定</option><option value="task">需完成任務</option><option value="pay">薪轉戶</option><option value="vip">理財貴賓</option></select></label>
@@ -130,12 +131,12 @@ function syncType(){
 function clearForm(){
   editing = -1;
   ['f_name','f_rate','f_cap','f_min','f_months','f_end','f_cond','f_url'].forEach(function(id){ $(id).value=''; });
-  $('f_type').value='活存'; $('f_who').value='open'; $('f_term').value='12'; syncType();
+  $('f_type').value='活存'; $('f_cur').value='TWD'; $('f_who').value='open'; $('f_term').value='12'; syncType();
   $('formTitle').textContent='新增活動'; $('saveBtn').textContent='加入清單';
 }
 function fillForm(i){
   var p = PROMOS[i]; editing = i;
-  $('f_bank').value=p.bank; $('f_name').value=p.name; $('f_type').value=p.type; $('f_rate').value=p.rate;
+  $('f_cur').value=p.cur||'TWD'; $('f_bank').value=p.bank; $('f_name').value=p.name; $('f_type').value=p.type; $('f_rate').value=p.rate;
   $('f_cap').value=p.cap; $('f_min').value=p.min||''; $('f_who').value=p.who; $('f_cond').value=p.cond||'';
   $('f_end').value=(p.end||'').replace(/\//g,'-'); $('f_url').value=p.url||'';
   if(p.type==='定存') $('f_term').value=String(p.months); else $('f_months').value=p.months;
@@ -155,14 +156,16 @@ function readForm(){
   var p = {bank:$('f_bank').value, name:$('f_name').value.trim(), type:type, rate:rate, cap:cap, months:months,
            who:$('f_who').value, cond:$('f_cond').value.trim(), end:$('f_end').value.replace(/-/g,'/'), checked:today()};
   if(min>0) p.min = min;
+  if($('f_cur').value!=='TWD') p.cur = $('f_cur').value;
   if($('f_url').value.trim()) p.url = $('f_url').value.trim();
   return p;
 }
+function U(p){ return p.cur==='USD' ? ' 美元' : p.cur==='JPY' ? ' 萬日圓' : ' 萬'; }
 function render(){
   var t = today();
   $('list').innerHTML = PROMOS.length ? PROMOS.map(function(p,i){
     return '<div class="item"><div><b>'+esc(bankName(p.bank))+'｜'+esc(p.name)+'</b>'
-      + '<div class="meta">'+p.type+' '+(p.rate==null?'牌告利率':p.rate+'%')+'，'+(p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'+(p.tiers||[]).map(function(t){ return '、到 '+t.cap+' 萬 '+(t.rate==null?'牌告利率':t.rate+'%'); }).join('')+'，'
+      + '<div class="meta">'+({USD:'美元 ',JPY:'日圓 '}[p.cur]||'')+p.type+' '+(p.rate==null?'牌告利率':p.rate+'%')+'，'+(p.min?p.min+U(p)+'以上、':'')+p.cap+U(p)+'內'+(p.tiers||[]).map(function(t){ return '、到 '+t.cap+U(p)+' '+(t.rate==null?'牌告利率':t.rate+'%'); }).join('')+'，'
       + (p.type==='活存'?'可享 '+span(p.months):span(p.months)+'期')+'，'+WHO[p.who]+'</div>'
       + '<div class="meta'+(p.end&&p.end<t?' expired':'')+'">'+(p.end?'到 '+esc(p.end):'未公告截止日')+(p.end&&p.end<t?'（已過期，網站不會顯示）':'')+'，最後確認 '+esc(p.checked)+'</div></div>'
       + '<div class="acts"><button type="button" class="ghost small" data-edit="'+i+'">修改</button>'

@@ -437,5 +437,19 @@
     "end": "2026/12/31",
     "checked": "2026/10/08",
     "url": "https://www.bot.com.tw/tw/other-pages/more-offers/detail/2f10358e-5bc4-f011-a707-98f2b3145f40"
+  },
+  {
+    "bank": "bot",
+    "cur": "USD",
+    "name": "115 年外匯數位存款帳戶活存優利",
+    "type": "活存",
+    "rate": 2.0,
+    "cap": 10000,
+    "months": 3,
+    "who": "open",
+    "cond": "需為臺銀外匯數位存款帳戶；利率為美元 6 個月定存牌告利率，會隨牌告調整；日終餘額未達 100 美元不計息，每年 6、12 月結息",
+    "end": "2026/12/31",
+    "checked": "2026/10/08",
+    "url": "https://www.bot.com.tw/tw/other-pages/more-offers/detail/2f10358e-5bc4-f011-a707-98f2b3145f40"
   }
 ]

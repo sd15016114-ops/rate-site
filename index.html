@@ -202,18 +202,19 @@ footer p{margin:0 0 6px;max-width:50em}
 <script>
 /* ===== 資料：讀取每日抓取的 data/rates.json 與人工維護的 data/promos.json ===== */
 var MODES = {
-  TWD:{unit:'萬元',   mult:10000, def:30,    max:9999,     width:'3.4em', cur:'元',   dec:0, tenors:[1,3,6,12,24,36], dem:'活期儲蓄', demPlan:'牌告活期儲蓄',
+  TWD:{unit:'萬元',   capUnit:' 萬',     mult:10000, def:30,    max:9999,     width:'3.4em', cur:'元',   dec:0, tenors:[1,3,6,12,24,36], dem:'活期儲蓄', demPlan:'牌告活期儲蓄',
        note:'利息為稅前估算。活動方案超過額度上限或優惠期結束後，改用該銀行牌告利率計算；牌告定存以固定利率、到期一次領回估算；一年以上採用定期儲蓄存款利率。'},
-  USD:{unit:'美元',   mult:1,     def:10000, max:99999999, width:'5.6em', cur:'美元', dec:2, tenors:[1,3,6,9,12],     dem:'活期存款', demPlan:'牌告美元活存'},
-  JPY:{unit:'萬日圓', mult:10000, def:100,   max:999999,   width:'4.4em', cur:'日圓', dec:0, tenors:[1,3,6,9,12],     dem:'活期存款', demPlan:'牌告日圓活存'}
+  USD:{unit:'美元',   capUnit:' 美元',   mult:1,     def:10000, max:99999999, width:'5.6em', cur:'美元', dec:2, tenors:[1,3,6,9,12],     dem:'活期存款', demPlan:'牌告美元活存'},
+  JPY:{unit:'萬日圓', capUnit:' 萬日圓', mult:10000, def:100,   max:999999,   width:'4.4em', cur:'日圓', dec:0, tenors:[1,3,6,9,12],     dem:'活期存款', demPlan:'牌告日圓活存'}
 };
-MODES.USD.note = MODES.JPY.note = '利息以外幣計、為稅前估算，不含換匯的匯差與手續費，也沒有計入匯率漲跌。牌告定存以固定利率、到期一次領回估算；外幣目前只收錄牌告利率，不含活動。';
+MODES.USD.note = MODES.JPY.note = '利息以外幣計、為稅前估算，不含換匯的匯差與手續費，也沒有計入匯率漲跌。活動方案超過額度上限或優惠期結束後，改用該銀行牌告利率計算；牌告定存以固定利率、到期一次領回估算。';
 var MODE = 'TWD', M = MODES.TWD, DATA = {TWD:[], USD:[], JPY:[]}, UPDATED = {}, ALLPROMOS = [], SAVED = {};
 var TENORS = M.tenors;
 var BANKS = [], PROMOS = [];
 var WHO = {open:'不限', new:'新戶限定', task:'需完成任務', pay:'薪轉戶', vip:'理財貴賓'};
 /* 額度說明：有最低金額時寫成「75 萬以上、300 萬內」 */
-function range(p){ return (p.min?p.min+' 萬以上、':'')+p.cap+' 萬內'; }
+function range(p){ return (p.min?amt(p.min)+M.capUnit+'以上、':'')+amt(p.cap)+M.capUnit+'內'; }
+function amt(n){ return Number(n).toLocaleString('zh-TW'); }
 /* 利率說明：分段計息的活動會把每一段都列出來，例如「10 萬內 12%，10–20 萬 2.1%」 */
 /* 分段裡利率留空（null）代表那一段照牌告利率 */
 function tp(r){ return r==null ? '牌告利率' : pct(r); }
@@ -222,13 +223,13 @@ function headline(p){ return Math.max.apply(null,[p.rate].concat((p.tiers||[]).m
 function dur(p){ return p.type!=='活存' ? span(p.months)+'期' : p.end ? '可享 '+span(p.months) : '不限期間'; }
 function terms(p){
   var prev = p.cap;
-  return range(p)+' '+tp(p.rate)+(p.tiers||[]).map(function(t){ var x='，'+(t.cap>=99999?'超過 '+prev+' 萬':prev+'–'+t.cap+' 萬')+' '+tp(t.rate); prev=t.cap; return x; }).join('');
+  return range(p)+' '+tp(p.rate)+(p.tiers||[]).map(function(t){ var x='，'+(t.cap>=99999?'超過 '+amt(prev)+M.capUnit:amt(prev)+'–'+amt(t.cap)+M.capUnit)+' '+tp(t.rate); prev=t.cap; return x; }).join('');
 }
 /* 活動期間內「金額 × 利率」的加總：依各段額度套用各段利率，超過最後一段的部分用牌告利率 rest */
 function weighted(p, amount, rest){
   var segs = [{cap:p.cap, rate:p.rate}].concat(p.tiers||[]), prev = 0, sum = 0;
   segs.forEach(function(g){
-    var top = Math.min(amount, g.cap*10000);
+    var top = Math.min(amount, g.cap*M.mult);
     if(top>prev){ sum += (top-prev)*(g.rate==null?rest:g.rate); prev = top; }
   });
   return sum + Math.max(0, amount-prev)*rest;
@@ -289,7 +290,7 @@ function options(amount, months, allow){
   PROMOS.forEach(function(p){
     var b = bank(p.bank);
     if(!b || !allow[p.who] || b.demand==null) return;
-    if(p.min && amount < p.min*10000) return;      /* 未達最低金額，不適用 */
+    if(p.min && amount < p.min*M.mult) return;      /* 未達最低金額，不適用 */
     var interest;
     if(p.type==='活存'){
       var pm = Math.min(months,p.months);
@@ -391,21 +392,19 @@ function remember(){
 
 function setMode(m){
   MODE = MODES[m] ? m : 'TWD'; M = MODES[MODE];
-  TENORS = M.tenors; BANKS = DATA[MODE]; PROMOS = MODE==='TWD' ? ALLPROMOS : [];
+  TENORS = M.tenors; BANKS = DATA[MODE]; PROMOS = ALLPROMOS.filter(function(p){ return (p.cur||'TWD')===MODE && bank(p.bank); });
   var mine = SAVED[MODE]||{}, mon = parseInt(mine.mon,10);
   $('mon').innerHTML = TENORS.map(function(t){ return '<option value="'+t+'">'+span(t)+'</option>'; }).join('');
   $('mon').value = TENORS.indexOf(mon)>=0 ? mon : 12;
   $('amt').value = mine.amt>0 ? mine.amt : M.def;
   $('amt').max = M.max; $('amt').style.width = M.width;
   $('unit').textContent = M.unit;
-  $('include').hidden = MODE!=='TWD';
-  $('include').style.display = MODE==='TWD' ? '' : 'none';
   $('calcNote').textContent = M.note;
   document.querySelectorAll('.modes button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.mode===MODE ? 'true' : 'false'); });
   $('updated').textContent = UPDATED[MODE] ? '每天早上自動更新，最近更新 '+day(UPDATED[MODE]) : '';
   $('introText').textContent = MODE==='TWD'
     ? '比較 '+BANKS.length+' 家銀行的活存、定存牌告利率與限時活動，填入金額就知道實際能拿多少利息。'
-    : '比較 '+BANKS.length+' 家銀行的'+M.cur+'活存、定存牌告利率，直接填入'+M.cur+'金額就知道能拿多少利息。';
+    : '比較 '+BANKS.length+' 家銀行的'+M.cur+'活存、定存牌告利率與限時活動，直接填入'+M.cur+'金額就知道能拿多少利息。';
   render();
 }
 document.querySelectorAll('.modes button').forEach(function(b){
@@ -423,7 +422,7 @@ Promise.all([load('rates.json'), load('promos.json').catch(function(){ return []
   });
   BANKS = DATA.TWD;
   /* 已過截止日的活動自動不顯示 */
-  ALLPROMOS = (Array.isArray(res[1])?res[1]:[]).filter(function(p){ return bank(p.bank) && (!p.end || p.end>=today); });
+  ALLPROMOS = (Array.isArray(res[1])?res[1]:[]).filter(function(p){ return !p.end || p.end>=today; });
   setMode(SAVED.mode||'TWD');
 }).catch(function(){
   $('updated').textContent = '資料載入失敗';
