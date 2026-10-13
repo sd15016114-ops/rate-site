@@ -533,7 +533,7 @@ def read_bank(cfg):
 
 def main(only=None):
     now = datetime.now(TPE)
-    print("抓取程式版本 15，共 %d 家銀行" % len(BANKS))
+    print("抓取程式版本 16，共 %d 家銀行" % len(BANKS))
     previous = {}
     if OUT.exists():
         previous = {b["id"]: b for b in json.loads(OUT.read_text(encoding="utf-8")).get("banks", [])}
@@ -546,7 +546,12 @@ def main(only=None):
             continue
         entry = {"id": cfg["id"], "name": cfg["name"], "source": cfg["url"]}
         try:
-            data, mode = read_bank(cfg)
+            try:
+                data, mode = read_bank(cfg)
+            except Exception as first:  # noqa: BLE001  銀行網站偶爾短暫異常：等一下再試一次
+                print("      %s 第一次失敗（%s），30 秒後重試" % (cfg["name"], first))
+                time.sleep(30)
+                data, mode = read_bank(cfg)
             old = previous.get(cfg["id"])
             jumps = big_jump(data, old) if old else []
             if jumps:
